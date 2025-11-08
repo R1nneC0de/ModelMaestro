@@ -48,10 +48,10 @@ The Agentic Model Training Platform is an autonomous AI system that democratizes
 #### Acceptance Criteria
 
 1. WHEN the Agent receives user input, THE Agent SHALL analyze the problem type (classification, regression, detection, etc.)
-2. THE Agent SHALL select an appropriate model architecture based on data type and problem characteristics
-3. THE Agent SHALL determine optimal hyperparameters for the selected model
-4. THE Agent SHALL log all decision rationales in the Audit Log
-5. IF the Agent identifies multiple viable approaches, THEN THE Agent SHALL evaluate each and select the highest-performing option
+2. THE Agent SHALL select exactly one model architecture based on data type and problem characteristics
+3. THE Agent SHALL determine fixed hyperparameters for the selected model using proven defaults
+4. THE Agent SHALL define acceptance thresholds appropriate for the problem type and domain
+5. THE Agent SHALL log all decision rationales in the Audit Log
 
 ### Requirement 4
 
@@ -91,15 +91,15 @@ The Agentic Model Training Platform is an autonomous AI system that democratizes
 
 ### Requirement 7
 
-**User Story:** As a user, I want the system to automatically evaluate and iterate on model performance, so that I receive the best possible model
+**User Story:** As a user, I want the system to train a single optimized model and validate it against quality thresholds, so that I receive a predictable, cost-effective solution
 
 #### Acceptance Criteria
 
-1. THE Agent SHALL split data into training, validation, and test sets using industry-standard ratios
-2. THE Agent SHALL evaluate model performance on the validation set after initial training
-3. IF validation performance falls below acceptable thresholds, THEN THE Agent SHALL adjust hyperparameters and retrain
-4. THE Agent SHALL limit iteration attempts to 5 cycles to prevent excessive resource consumption
-5. WHEN the Agent completes iterations, THE Platform SHALL report the best-performing model configuration
+1. THE Agent SHALL split data into training, validation, and test sets using fixed ratios (80/10/10)
+2. THE Agent SHALL select exactly one model architecture with fixed hyperparameters based on problem analysis
+3. THE Agent SHALL train the selected model once without hyperparameter tuning iterations
+4. THE Agent SHALL evaluate the trained model against predefined acceptance thresholds for the problem type
+5. WHEN evaluation completes, THE Platform SHALL report whether the model meets acceptance criteria with diagnostic information
 
 ### Requirement 8
 

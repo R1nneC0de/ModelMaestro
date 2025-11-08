@@ -4,6 +4,22 @@
 
 The Agentic Model Training Platform is a full-stack web application that leverages Google Cloud's Vertex AI to provide autonomous machine learning model training. The system uses a microservices architecture with a React frontend, FastAPI backend, and an intelligent agent orchestrator powered by Gemini models. The platform automates the entire ML pipeline from data ingestion to model deployment, making ML accessible to non-experts.
 
+### Single-Model Training Philosophy
+
+The platform follows a **deterministic, single-model approach** for predictability and cost-effectiveness:
+
+- **One Strategy In, One Model Out**: The Model Selector (Step 4) outputs exactly one algorithm with fixed hyperparameters
+- **No Multi-Model Comparison**: No parallel training of multiple models or hyperparameter optimization trials
+- **Fixed Configuration**: All training parameters (split ratios, random seed, hyperparameters) are determined upfront
+- **Acceptance Gates**: Models are evaluated against predefined thresholds rather than compared to alternatives
+- **Clear Outcomes**: Training produces either ACCEPT (model meets criteria) or REJECT (with diagnostic recommendations)
+
+This approach prioritizes:
+- **Predictability**: Users know exactly what will be trained
+- **Cost Control**: Single training job per project
+- **Speed**: No iterative tuning loops
+- **Transparency**: Clear decision rationale and acceptance criteria
+
 ## Architecture
 
 ### High-Level Architecture
@@ -252,19 +268,136 @@ class ModelSelector:
     async def select_model(self, analysis: ProblemAnalysis, data: ProcessedData) -> ModelConfig:
         """
         Uses Gemini reasoning + rule-based logic to select:
-        - Model architecture (CNN, Transformer, XGBoost, etc.)
-        - Vertex AI AutoML type
-        - Initial hyperparameters
+        - Exactly ONE model architecture (XGBoost, Linear, AutoML, etc.)
+        - Fixed hyperparameters (no HPO)
+        - Acceptance thresholds for validation
+        - Training configuration (split ratios, random seed)
         """
         pass
 
 @dataclass
 class ModelConfig:
-    architecture: str
-    vertex_ai_type: str
-    hyperparameters: Dict[str, Any]
-    training_budget_hours: int
+    architecture: str  # e.g., 'xgboost_clf', 'linear_reg', 'automl_tabular'
+    vertex_ai_type: str  # 'automl' or 'custom'
+    hyperparameters: Dict[str, Any]  # Fixed values, not ranges
+    split_config: SplitConfig  # train/val/test ratios, seed
+    acceptance_thresholds: Dict[str, float]  # e.g., {'roc_auc': 0.70, 'rmse': 0.9}
+    primary_metric: str  # e.g., 'roc_auc' or 'rmse'
     reasoning: str
+```
+
+##### Model Selection Routing Policy
+
+The Model Selector uses the following routing logic to choose exactly one algorithm:
+
+**Tabular Data:**
+- **≥10k rows, numeric/categorical**: `xgboost_reg` or `xgboost_clf`
+- **≤5k rows, linear relationships**: `linear_reg` or `logistic_clf`
+- **Mixed types, unsure**: `automl_tabular` (single job, low budget)
+
+**Text Data:**
+- **Text as main signal**: `text_dnn` (1-2 dense layers on TF-IDF)
+- **Or route to AutoML with text enabled**
+
+**Image Data:**
+- **Route to AutoML Vision** (single job)
+
+##### Fixed Hyperparameter Defaults
+
+**XGBoost (Regression):**
+```python
+{
+    'max_depth': 6,
+    'n_estimators': 800,
+    'eta': 0.05,
+    'subsample': 0.9,
+    'colsample_bytree': 0.9,
+    'min_child_weight': 3
+}
+```
+
+**XGBoost (Classification):**
+```python
+{
+    'max_depth': 6,
+    'n_estimators': 800,
+    'eta': 0.05,
+    'subsample': 0.9,
+    'colsample_bytree': 0.9,
+    'min_child_weight': 3,
+    'scale_pos_weight': <calculated if imbalance > 4:1>
+}
+```
+
+**Linear/Logistic:**
+```python
+{
+    'penalty': 'l2',
+    'C': 1.0,
+    'standardize_numeric': True,
+    'one_hot_categorical': True
+}
+```
+
+**Text DNN:**
+```python
+{
+    'layers': [128, 64],
+    'epochs': 10,
+    'batch_size': 512,
+    'embedding': 'tfidf'
+}
+```
+
+##### Split Configuration
+
+**Default:**
+```python
+{
+    'train_ratio': 0.8,
+    'val_ratio': 0.1,
+    'test_ratio': 0.1,
+    'random_seed': 42,
+    'stratify': True  # for classification
+}
+```
+
+**Time-series:**
+```python
+{
+    'split_type': 'time_ordered',
+    'train_ratio': 0.8,
+    'val_ratio': 0.1,
+    'test_ratio': 0.1,
+    'no_shuffle': True
+}
+```
+
+##### Acceptance Thresholds
+
+**Classification:**
+```python
+{
+    'primary_metric': 'roc_auc',
+    'thresholds': {
+        'roc_auc': 0.70,  # MVP threshold
+        'f1': 0.60,  # Sanity check
+        'precision': 0.50,  # Sanity check
+        'recall': 0.50  # Sanity check
+    }
+}
+```
+
+**Regression:**
+```python
+{
+    'primary_metric': 'rmse',
+    'thresholds': {
+        'rmse': 0.9 * baseline_rmse,  # baseline = predict mean
+        'r2': 0.1,  # Minimum explained variance
+        'mae': 0.9 * baseline_mae
+    }
+}
 ```
 
 #### Training Manager
@@ -272,29 +405,89 @@ class ModelConfig:
 class TrainingManager:
     async def train_model(self, config: ModelConfig, data: ProcessedData) -> TrainingJob:
         """
-        - Creates Vertex AI training job
-        - Monitors progress
-        - Handles failures and retries
+        Single-model training orchestration:
+        - Creates exactly ONE training job (AutoML or Custom)
+        - Applies fixed preprocessing from config
+        - Performs fixed data split (train/val/test)
+        - Trains with fixed hyperparameters
+        - Monitors progress with status updates
+        - Handles failures with clear error messages (no auto-retry)
         """
         pass
     
-    async def evaluate_and_iterate(self, job: TrainingJob, max_iterations: int = 5) -> Model:
+    async def evaluate_model(self, job: TrainingJob, config: ModelConfig) -> ModelEvaluation:
         """
-        - Evaluates on validation set
-        - Decides if iteration needed
-        - Adjusts hyperparameters
-        - Retrains if necessary
+        Single evaluation against acceptance thresholds:
+        - Evaluates on held-out test set
+        - Compares metrics to acceptance thresholds
+        - Returns ACCEPT or REJECT decision with diagnostics
+        - Generates performance report
+        - NO automatic retraining
         """
         pass
     
     async def deploy_model(self, model: Model) -> Endpoint:
         """
-        - Deploys to Vertex AI Endpoint
+        - Deploys to Vertex AI Endpoint (optional)
         - Configures autoscaling
         - Returns API endpoint URL
+        - Provides downloadable model artifacts
         """
         pass
 ```
+
+##### Training Job States
+
+```python
+class TrainingState(Enum):
+    QUEUED = "queued"
+    RUNNING = "running"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+```
+
+##### Standard Training Outputs
+
+All training jobs produce a uniform output format:
+
+```python
+@dataclass
+class TrainingOutput:
+    # Metrics
+    metrics: Dict[str, float]  # {primary_metric, all_secondary, val, test}
+    primary_metric_value: float
+    
+    # Artifacts
+    model_uri: str  # GCS path or Vertex Model ID
+    prep_uri: str  # Preprocessing artifacts (imputers/encoders/schema)
+    report_uri: str  # Markdown/HTML summary report
+    
+    # Provenance
+    step3_summary_hash: str  # Hash of preprocessing summary
+    strategy_config: ModelConfig  # Complete config used
+    package_versions: Dict[str, str]  # Python packages used
+    random_seed: int
+    training_duration_seconds: float
+```
+
+##### Failure Handling
+
+The Training Manager handles failures explicitly without automatic retry:
+
+**Schema/Read Errors:**
+- Return explicit cause (delimiter, header, type mismatch)
+- Provide sample of problematic data
+- NO retry
+
+**OOM or Training Errors:**
+- Return error message with resource details
+- Suggest alternate route (informational only)
+- NO automatic rerun
+
+**Threshold Not Met:**
+- Return full report with diagnostics
+- Suggest tweaks (e.g., "increase max_depth", "switch to AutoML")
+- NO automatic retraining
 
 ### 4. Data Models
 

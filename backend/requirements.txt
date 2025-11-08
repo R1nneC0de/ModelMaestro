@@ -31,6 +31,11 @@ passlib[bcrypt]==1.7.4
 # Logging and Monitoring
 structlog==24.1.0
 
+# ML and Data Science
+numpy==1.26.3
+scikit-learn==1.4.0
+matplotlib==3.8.2
+
 # Testing
 pytest==7.4.4
 pytest-asyncio==0.23.3

@@ -127,22 +127,22 @@
     - _Requirements: 3.4_
 
 - [ ] 5. Implement Data Processor component
-  - [ ] 5.1 Create DataProcessor class
+  - [x] 5.1 Create DataProcessor class
     - Implement in backend/app/services/agent/data_processor.py
     - Add data quality validation logic
     - Build missing value handling strategies
     - _Requirements: 7.1, 8.1_
-  - [ ] 5.2 Implement data splitting
+  - [x] 5.2 Implement data splitting
     - Create train/validation/test split (70/15/15 ratio)
     - Handle stratification for classification tasks
     - _Requirements: 7.1_
-  - [ ] 5.3 Build feature engineering pipelines
+  - [x] 5.3 Build feature engineering pipelines
     - Create pipelines for image data
     - Create pipelines for text data
     - Create pipelines for tabular data
     - Add normalization and standardization utilities
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
-  - [ ] 5.4 Integrate with Cloud Storage
+  - [x] 5.4 Integrate with Cloud Storage
     - Upload processed data to GCS
     - Store data split metadata
     - _Requirements: 8.1_
@@ -166,56 +166,85 @@
     - Store approval decisions in GCS
     - _Requirements: 4.5_
 
-- [ ] 7. Build Model Selector component
-  - [ ] 7.1 Create ModelSelector class
+- [x] 7. Build Model Selector component (single-model selection)
+  - [x] 7.1 Create ModelSelector class
     - Implement in backend/app/services/agent/model_selector.py
-    - Build model architecture selection logic
-    - Map problem types to Vertex AI AutoML types
-    - _Requirements: 3.1, 3.2_
-  - [ ] 7.2 Implement hyperparameter recommendation
-    - Use Gemini for hyperparameter suggestions
-    - Create training budget estimation logic
-    - _Requirements: 3.3_
-  - [ ] 7.3 Add decision reasoning
+    - Build model architecture selection logic (select exactly ONE)
+    - Map problem types to routes: automl_tabular OR custom_algo (xgboost, linear, etc.)
+    - Implement routing policy (≥10k rows → XGBoost, ≤5k → Linear, unsure → AutoML)
+    - _Requirements: 3.1, 3.2, 3.3_
+  - [x] 7.2 Implement fixed hyperparameter configuration
+    - Define proven default hyperparameters for each algorithm
+    - XGBoost: max_depth=6, n_estimators=800, eta=0.05, subsample=0.9, etc.
+    - Linear/Logistic: L2 penalty, C=1.0, standardize numeric
+    - Configure split ratios (train/val/test = 0.8/0.1/0.1, random_seed=42)
+    - NO hyperparameter ranges or tuning - fixed values only
+    - _Requirements: 3.3, 7.1_
+  - [x] 7.3 Define acceptance thresholds
+    - Set default thresholds by problem type
+    - Classification: roc_auc ≥ 0.70, check calibration
+    - Regression: rmse ≤ 0.9*baseline, r2 ≥ 0.1
+    - Define primary metric for each problem type
+    - _Requirements: 3.4, 7.4_
+  - [x] 7.4 Add decision reasoning
     - Generate human-readable explanations for model choices
+    - Explain why this specific algorithm was selected
+    - Document hyperparameter choices
     - Implement confidence scoring
     - Add fallback selection for edge cases
     - _Requirements: 3.4, 3.5_
 
-- [ ] 8. Implement Training Manager component
-  - [ ] 8.1 Create Vertex AI client
+- [x] 8. Implement Training Manager component (single-model orchestration) Make sure all files created follow the best coding practices and are modular
+  - [x] 8.1 Create Vertex AI client
     - Implement client in backend/app/services/cloud/vertex_client.py
     - Configure authentication and project settings
+    - Add methods for AutoML Tabular job creation
+    - Add methods for Custom Training job creation
     - _Requirements: 9.1_
-  - [ ] 8.2 Build TrainingManager class
+  - [x] 8.2 Build TrainingManager class for single-model training
     - Implement in backend/app/services/agent/training_manager.py
-    - Create training job submission logic
-    - Build job status monitoring with polling
-    - _Requirements: 9.1, 9.2, 7.2_
-  - [ ] 8.3 Add failure handling
-    - Implement retry logic (max 3 attempts)
-    - Create error recovery strategies
+    - Create single training job submission (AutoML OR Custom based on ModelConfig)
+    - Apply fixed preprocessing from Step 3
+    - Perform fixed data split using config (train/val/test with random_seed)
+    - Train with fixed hyperparameters (no HPO)
+    - Build job status monitoring with polling (QUEUED → RUNNING → SUCCEEDED/FAILED)
+    - Generate standard output format (metrics, artifacts, provenance)
+    - _Requirements: 9.1, 9.2, 7.2, 7.3_
+  - [x] 8.3 Add observability and failure handling
+    - Implement structured logging with Cloud Logging integration
+    - Surface last N errors in backend responses
+    - Return explicit error causes (schema errors, OOM, training failures)
+    - NO automatic retry logic - fail with clear diagnostics
     - _Requirements: 7.3, 7.4_
-  - [ ] 8.4 Integrate hyperparameter tuning
-    - Configure Vertex AI hyperparameter tuning
-    - Track tuning progress
-    - _Requirements: 9.2_
+  - [x] 8.4 Implement artifact management
+    - Store model artifacts to GCS (model_uri)
+    - Store preprocessing artifacts (prep_uri: imputers/encoders/schema)
+    - Generate training report (report_uri: markdown/HTML summary)
+    - Store provenance metadata (step-3 hash, config, package versions, seed)
+    - _Requirements: 9.3, 5.1_
 
-- [ ] 9. Develop model evaluation and iteration system
-  - [ ] 9.1 Create evaluation utilities
+- [x] 9. Develop model evaluation with acceptance gates (no iteration)
+  - [x] 9.1 Create evaluation utilities
     - Implement in backend/app/services/agent/evaluator.py
-    - Build metric calculation (accuracy, precision, recall, F1)
+    - Build metric calculation for classification (accuracy, precision, recall, F1, ROC-AUC)
+    - Build metric calculation for regression (RMSE, MAE, R²)
+    - Calculate baseline metrics (e.g., predict mean for regression)
     - Add support for different problem types
-    - _Requirements: 7.2_
-  - [ ] 9.2 Build iteration decision logic
-    - Determine when to iterate based on performance thresholds
-    - Create hyperparameter adjustment strategies
-    - _Requirements: 7.3, 7.4_
-  - [ ] 9.3 Implement iteration loop
-    - Add iteration tracking (max 5 cycles)
-    - Generate performance comparison reports
-    - Store iteration history in GCS
-    - _Requirements: 7.4, 7.5_
+    - _Requirements: 7.2, 7.4_
+  - [x] 9.2 Implement acceptance threshold logic
+    - Define default thresholds by problem type (classification: AUC ≥ 0.70, regression: RMSE ≤ 0.9*baseline)
+    - Compare model metrics to acceptance thresholds
+    - Generate ACCEPT or REJECT decision
+    - Add sanity checks (F1, precision/recall for imbalance; MAE/R² for regression)
+    - _Requirements: 7.3, 7.4, 7.5_
+  - [x] 9.3 Build diagnostic report generator
+    - Create acceptance report with decision and reasoning
+    - Include all metrics (primary + secondary)
+    - Add key plots (ROC/PR curves for classification, residual plots for regression)
+    - Generate recommendations for rejected models (e.g., "increase max_depth", "try AutoML")
+    - Store evaluation results in GCS
+    - NO automatic retraining - informational only
+    - _Requirements: 7.4, 7.5, 5.3_
 
 - [ ] 10. Build model deployment service
   - [ ] 10.1 Create deployment utilities
