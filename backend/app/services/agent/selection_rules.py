@@ -213,6 +213,14 @@ class ModelSelectionRules:
 
         is_small_dataset = dataset_profile.num_samples < 5000
 
+        # Calculate budget based on dataset size for text models
+        if dataset_profile.num_samples < 500:
+            text_budget_hours = 0.5  # 30 minutes
+        elif dataset_profile.num_samples < 5000:
+            text_budget_hours = 2.0  # 2 hours
+        else:
+            text_budget_hours = 8.0  # 8 hours
+
         if is_small_dataset or complexity_score > 0.7:
             # Use AutoML Text for small datasets or complex problems
             return ModelRecommendation(
@@ -221,7 +229,7 @@ class ModelSelectionRules:
                 vertex_product=VertexAIProduct.AUTOML_TEXT,
                 hyperparameters=HyperparameterConfig(
                     model_specific={
-                        "train_budget_milli_node_hours": 8000,  # 8 node hours
+                        "train_budget_milli_node_hours": int(text_budget_hours * 1000),
                         "optimization_objective": "maximize-au-prc",
                     }
                 ),
@@ -276,6 +284,16 @@ class ModelSelectionRules:
 
         is_small_dataset = dataset_profile.num_samples < 1000
 
+        # Calculate budget based on dataset size for image models
+        if dataset_profile.num_samples < 100:
+            image_budget_hours = 0.5  # 30 minutes
+        elif dataset_profile.num_samples < 500:
+            image_budget_hours = 1.0  # 1 hour
+        elif dataset_profile.num_samples < 5000:
+            image_budget_hours = 4.0  # 4 hours
+        else:
+            image_budget_hours = 8.0  # 8 hours
+
         # Default to AutoML Image for most cases
         return ModelRecommendation(
             architecture=ModelArchitecture.AUTOML_IMAGE,
@@ -283,7 +301,7 @@ class ModelSelectionRules:
             vertex_product=VertexAIProduct.AUTOML_IMAGE,
             hyperparameters=HyperparameterConfig(
                 model_specific={
-                    "train_budget_milli_node_hours": 8000 if not is_small_dataset else 4000,
+                    "train_budget_milli_node_hours": int(image_budget_hours * 1000),
                     "model_type": "CLOUD",  # vs MOBILE_TF_LOW_LATENCY, etc.
                 }
             ),
@@ -307,13 +325,23 @@ class ModelSelectionRules:
     ) -> ModelRecommendation:
         """Select model for time series data."""
 
+        # Calculate budget based on dataset size for timeseries models
+        if dataset_profile.num_samples < 100:
+            ts_budget_hours = 0.3  # 18 minutes
+        elif dataset_profile.num_samples < 1000:
+            ts_budget_hours = 0.5  # 30 minutes
+        elif dataset_profile.num_samples < 10000:
+            ts_budget_hours = 2.0  # 2 hours
+        else:
+            ts_budget_hours = 8.0  # 8 hours
+
         return ModelRecommendation(
             architecture=ModelArchitecture.AUTOML_FORECASTING,
             training_strategy=TrainingStrategy.AUTOML,
             vertex_product=VertexAIProduct.AUTOML_FORECASTING,
             hyperparameters=HyperparameterConfig(
                 model_specific={
-                    "train_budget_milli_node_hours": 8000,
+                    "train_budget_milli_node_hours": int(ts_budget_hours * 1000),
                     "optimization_objective": "minimize-rmse",
                 }
             ),
@@ -384,13 +412,19 @@ class ModelSelectionRules:
     ) -> ModelRecommendation:
         """Create AutoML Tabular recommendation."""
 
-        # Estimate budget based on dataset size
-        if dataset_profile.num_samples < 100000:
-            budget_hours = 1.0
+        # Estimate budget based on dataset size - use smaller budgets for smaller datasets
+        if dataset_profile.num_samples < 100:
+            budget_hours = 0.1  # 6 minutes - very small datasets
+        elif dataset_profile.num_samples < 1000:
+            budget_hours = 0.2  # 12 minutes - small datasets
+        elif dataset_profile.num_samples < 10000:
+            budget_hours = 0.5  # 30 minutes - medium-small datasets
+        elif dataset_profile.num_samples < 100000:
+            budget_hours = 1.0  # 1 hour - medium datasets
         elif dataset_profile.num_samples < 1000000:
-            budget_hours = 4.0
+            budget_hours = 4.0  # 4 hours - large datasets
         else:
-            budget_hours = 24.0
+            budget_hours = 24.0  # 24 hours - very large datasets
 
         optimization_objective = "maximize-au-roc" if problem_type == ProblemType.CLASSIFICATION else "minimize-rmse"
 
