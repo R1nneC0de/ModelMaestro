@@ -28,15 +28,15 @@ from tenacity import (
     wait_exponential,
 )
 
-from backend.app.core.config import settings
-from backend.app.services.agent.exceptions import (
+from app.core.config import settings
+from .exceptions import (
     GeminiAPIError,
     GeminiClientError,
     GeminiRateLimitError,
     GeminiTimeoutError,
     GeminiValidationError,
 )
-from backend.app.services.agent.response_parser import ResponseParser
+from .response_parser import ResponseParser
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,7 @@ import logging
 import re
 from typing import Any, Dict
 
-from backend.app.services.agent.exceptions import GeminiValidationError
+from .exceptions import GeminiValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -96,3 +96,22 @@ Format your response as a JSON object enclosed in curly braces."""
         if system_instruction:
             return f"{system_instruction}\n\n{json_instruction}"
         return json_instruction
+
+
+# Convenience function for backward compatibility
+def parse_json_response(text: str) -> Dict[str, Any]:
+    """
+    Parse JSON from a text response.
+
+    Convenience wrapper around ResponseParser.extract_json for easier imports.
+
+    Args:
+        text: Response text potentially containing JSON
+
+    Returns:
+        Parsed JSON dictionary
+
+    Raises:
+        GeminiValidationError: If JSON cannot be parsed
+    """
+    return ResponseParser.extract_json(text)

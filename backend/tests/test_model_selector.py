@@ -2,9 +2,9 @@
 Tests for model selection agent.
 """
 import pytest
-from backend.app.services.agent.model_selector import ModelSelector
-from backend.app.services.agent.types import ProblemType, DataType, ProblemAnalysis
-from backend.app.services.agent.model_types import (
+from app.services.agent.model_selector import ModelSelector
+from app.services.agent.types import ProblemType, DataType, ProblemAnalysis
+from app.services.agent.model_types import (
     DatasetProfile,
     ModelArchitecture,
     TrainingStrategy,

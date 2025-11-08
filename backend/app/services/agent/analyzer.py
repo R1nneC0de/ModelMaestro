@@ -9,9 +9,9 @@ including problem classification, data type detection, and domain identification
 import logging
 from typing import Any, Dict, List, Optional
 
-from backend.app.services.agent.gemini_client import GeminiClient
-from backend.app.services.agent.prompts import AnalyzerPrompts
-from backend.app.services.agent.types import DataType, ProblemAnalysis, ProblemType
+from .gemini_client import GeminiClient
+from .prompts import AnalyzerPrompts
+from .types import DataType, ProblemAnalysis, ProblemType
 
 logger = logging.getLogger(__name__)
 
