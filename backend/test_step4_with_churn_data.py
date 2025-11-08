@@ -87,12 +87,12 @@ def analyze_csv(csv_path: str):
     if len(churn_counter) >= 2:
         min_class = min(churn_counter.values())
         max_class = max(churn_counter.values())
-        class_imbalance_ratio = min_class / max_class
+        class_imbalance_ratio = 1 - (min_class / max_class)
     else:
         class_imbalance_ratio = 1.0
 
     print(f"  - Class Imbalance Ratio: {class_imbalance_ratio:.3f}")
-    if class_imbalance_ratio < 0.5:
+    if class_imbalance_ratio > 0.66:
         print(f"    ⚠️  Imbalanced dataset detected!")
 
     # Sample data for CSV validation (10% sample)
