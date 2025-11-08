@@ -1,271 +1,462 @@
 # Implementation Plan
 
-- [ ] 1. Set up project infrastructure and configuration
-  - Initialize monorepo structure with backend and frontend directories
-  - Configure Python environment with Poetry for dependency management
-  - Set up Node.js environment for React frontend
-  - Create Docker configurations for backend and frontend services
-  - Configure Google Cloud project and enable required APIs (Vertex AI, Cloud Storage, Cloud Run)
-  - Set up environment variable management and secrets
-  - _Requirements: 9.1, 9.2, 9.3, 9.4, 10.1, 10.2_
+## Status: Project scaffolding complete, ready for implementation
 
-- [ ] 2. Implement database models and migrations
-  - Create SQLAlchemy models for User, Project, Dataset, Model, and AuditEntry tables
-  - Implement Alembic migrations for database schema
-  - Add database indexes for performance optimization
-  - Create database connection pooling configuration
-  - _Requirements: 10.3, 10.4_
+**Note:** This is a simplified hackathon version with authentication, advanced security, deployment automation, and extensive monitoring removed to focus on core ML pipeline functionality.
 
-- [ ] 3. Build authentication and authorization system
-  - Implement OAuth 2.0 integration with Google Sign-In
-  - Create JWT token generation and validation utilities
-  - Build authentication middleware for FastAPI
-  - Implement role-based access control (RBAC) decorators
-  - Create user registration and login endpoints
-  - _Requirements: 10.3, 10.4_
+## Code Quality Standards
 
-- [ ] 4. Develop data upload and storage service
-  - Create file upload endpoint with multipart form data support
-  - Implement file validation for CSV, image folders, and JSON formats
-  - Build Google Cloud Storage integration for file uploads
-  - Create dataset metadata extraction and storage logic
-  - Implement data preview generation for uploaded datasets
-  - Add file size and format validation (max 10GB)
-  - _Requirements: 1.2, 1.4, 8.1_
+**All tasks must follow these best practices and production-grade standards:**
 
-- [ ] 5. Build Problem Analyzer component
-  - Integrate Google Gemini API client
-  - Create prompt templates for problem analysis
-  - Implement problem type classification logic (classification, regression, detection, etc.)
-  - Build data type detection (image, text, tabular, multimodal)
-  - Create domain identification logic
-  - Implement confidence scoring for analysis results
-  - Generate human-readable reasoning for decisions
-  - _Requirements: 1.1, 3.1, 3.4, 8.1, 8.2, 8.3, 8.4, 8.5_
+### General Requirements
+- **Modularity**: Write modular, reusable code with clear separation of concerns
+- **Type Safety**: Use type hints in Python (PEP 484) and TypeScript for all functions and classes
+- **Error Handling**: Implement comprehensive error handling with specific exception types
+- **Logging**: Add structured logging at appropriate levels (DEBUG, INFO, WARNING, ERROR)
+- **Documentation**: Include docstrings for all classes and functions (Google style for Python)
+- **Code Style**: Follow PEP 8 for Python, ESLint/Prettier for TypeScript/React
+- **Testing**: Write testable code with dependency injection where appropriate
+- **Performance**: Consider performance implications and optimize where necessary
+- **Security**: Follow security best practices (input validation, sanitization, secure defaults)
 
-- [ ] 6. Implement Data Processor component
-  - Create data quality validation logic
-  - Build missing value handling strategies
-  - Implement train/validation/test split functionality (70/15/15 ratio)
-  - Create feature engineering pipelines for different data types
-  - Build data normalization and standardization utilities
-  - Implement data upload to Google Cloud Storage
-  - _Requirements: 7.1, 8.1, 8.2, 8.3, 8.4_
+### Python Backend Standards
+- Use async/await for I/O operations
+- Implement proper resource cleanup (context managers, try/finally)
+- Use Pydantic for data validation and serialization
+- Follow SOLID principles for class design
+- Keep functions focused and under 50 lines when possible
+- Use descriptive variable and function names
+- Avoid global state and side effects
 
-- [ ] 7. Develop unlabeled data handling system
-  - Create labeling strategy selector using Gemini reasoning
-  - Implement zero-shot labeling with Gemini for image and text data
-  - Build weak supervision framework for semi-supervised learning
-  - Create transfer learning dataset search and matching
-  - Implement confidence scoring for generated labels
-  - Build user approval workflow for labeling strategies
-  - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
+### React Frontend Standards
+- Use functional components with hooks
+- Implement proper error boundaries
+- Follow React best practices (key props, avoid inline functions in renders)
+- Use TypeScript interfaces for all props and state
+- Implement proper loading and error states
+- Keep components focused and under 200 lines
+- Use custom hooks for reusable logic
+- Implement proper accessibility (ARIA labels, keyboard navigation)
 
-- [ ] 8. Build Model Selector component
-  - Create model architecture selection logic based on problem type and data
-  - Implement Vertex AI AutoML type mapping (AutoML Vision, Tables, NLP)
-  - Build hyperparameter recommendation system using Gemini
-  - Create training budget estimation logic
-  - Implement decision reasoning generation
-  - Add fallback model selection for edge cases
-  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+### Production-Grade Requirements
+- **Reliability**: Code should handle edge cases and fail gracefully
+- **Maintainability**: Code should be easy to understand and modify
+- **Scalability**: Consider future growth and extensibility
+- **Observability**: Include metrics, logs, and traces for debugging
+- **Configuration**: Use environment variables for all configurable values
+- **Validation**: Validate all inputs at API boundaries
+- **Idempotency**: Ensure operations can be safely retried
+- **Resource Management**: Properly manage connections, file handles, and memory
 
-- [ ] 9. Implement Training Manager component
-  - Integrate Vertex AI Python SDK
-  - Create Vertex AI training job submission logic
-  - Build job status monitoring with polling mechanism
-  - Implement training progress tracking and updates
-  - Create failure handling and retry logic (max 3 attempts)
-  - Build hyperparameter tuning integration
-  - _Requirements: 9.1, 9.2, 7.2, 7.3, 7.4_
+- [x] 1. Set up project infrastructure and configuration
+  - [x] 1.1 Create pyproject.toml with Poetry for Python dependency management
+    - Add FastAPI, SQLAlchemy, Alembic, Celery, Redis, google-cloud-aiplatform, google-generativeai
+    - Configure Python 3.11+ requirement
+    - _Requirements: 9.1, 9.2_
+  - [x] 1.2 Create package.json for React frontend
+    - Add React 18, TypeScript, Vite, Material-UI, React Query, React Router
+    - Configure build scripts
+    - _Requirements: 1.1_
+  - [x] 1.3 Create Docker configurations
+    - Write Dockerfile for backend service
+    - Write Dockerfile for frontend service
+    - Create docker-compose.yml for local development
+    - _Requirements: 9.3_
+  - [x] 1.4 Set up environment configuration
+    - Create .env.example with required variables
+    - Document Google Cloud project setup steps
+    - Create config.py for environment variable management
+    - _Requirements: 9.4, 10.1, 10.2_
+  - [x] 1.5 Configure GCS bucket structure
+    - Define bucket folder structure for metadata storage
+    - Document JSON schema for each entity type
+    - _Requirements: 10.3_
 
-- [ ] 10. Develop model evaluation and iteration system
-  - Create model performance evaluation on validation set
-  - Implement metric calculation (accuracy, precision, recall, F1, etc.)
-  - Build iteration decision logic based on performance thresholds
-  - Create hyperparameter adjustment strategies
-  - Implement iteration loop with max 5 cycles limit
-  - Generate performance comparison reports across iterations
-  - _Requirements: 7.2, 7.3, 7.4, 7.5_
+- [x] 2. Implement GCS-based storage service
+  - [x] 2.1 Create GCS storage manager
+    - Implement StorageManager class in backend/app/services/cloud/storage_manager.py
+    - Add methods for storing/retrieving project metadata as JSON
+    - Add methods for storing/retrieving dataset metadata as JSON
+    - Add methods for storing/retrieving model metadata as JSON
+    - Add methods for storing/retrieving audit logs as JSON
+    - Implement list/query operations with filtering
+    - _Requirements: 10.3, 10.4_
+  - [x] 2.2 Create data models as Pydantic schemas
+    - Create Project schema in backend/app/schemas/project.py
+    - Create Dataset schema in backend/app/schemas/dataset.py
+    - Create Model schema in backend/app/schemas/model.py
+    - Create AuditEntry schema in backend/app/schemas/audit.py
+    - Add validation and serialization methods
+    - _Requirements: 10.3, 10.4_
 
-- [ ] 11. Build model deployment service
-  - Create Vertex AI Endpoint deployment logic
-  - Implement endpoint configuration with autoscaling
-  - Build model artifact download preparation
-  - Create signed URL generation for secure downloads
-  - Implement endpoint health checking
-  - Add deployment failure handling with graceful fallback
-  - _Requirements: 5.1, 5.2, 9.4_
+- [ ] 3. Develop data upload and storage service
+  - [ ] 3.1 Create Google Cloud Storage client
+    - Implement GCS utilities in backend/app/services/cloud/storage.py
+    - Add bucket creation and file upload functions
+    - _Requirements: 1.2, 8.1_
+  - [ ] 3.2 Build file validation utilities
+    - Create validators in backend/app/utils/validators.py
+    - Validate CSV, image folders, JSON formats
+    - Check file size limits (max 10GB)
+    - _Requirements: 1.4_
+  - [ ] 3.3 Implement data upload endpoint
+    - Create POST /api/v1/data/upload in backend/app/api/v1/endpoints/data.py
+    - Handle multipart form data
+    - Extract and store dataset metadata
+    - _Requirements: 1.2, 1.4_
+  - [ ] 3.4 Create data preview functionality
+    - Generate previews for different data types
+    - Create GET /api/v1/data/{dataset_id}/preview endpoint
+    - _Requirements: 1.4_
 
-- [ ] 12. Implement Agent Orchestrator
-  - Create main pipeline orchestration flow
-  - Build stage transition logic with state management
-  - Implement error handling and recovery strategies
-  - Create audit log generation for all decisions
-  - Build progress tracking and event emission
-  - Implement user approval checkpoints for major decisions
-  - Add pipeline cancellation support
-  - _Requirements: 3.4, 6.1, 6.2, 6.3, 6.4, 6.5_
+- [-] 4. Build Problem Analyzer component
+  - [x] 4.1 Create Gemini API client
+    - Implement client in backend/app/services/agent/gemini_client.py
+    - Add error handling and retry logic
+    - _Requirements: 3.1_
+  - [x] 4.2 Implement Problem Analyzer
+    - Create ProblemAnalyzer class in backend/app/services/agent/analyzer.py
+    - Build prompt templates for problem analysis
+    - Implement problem type classification (classification, regression, detection)
+    - Add data type detection (image, text, tabular, multimodal)
+    - Create domain identification logic
+    - _Requirements: 1.1, 3.1, 3.4, 8.1, 8.2, 8.3, 8.4, 8.5_
+  - [ ] 4.3 Add confidence scoring and reasoning
+    - Generate confidence scores for analysis results
+    - Create human-readable reasoning explanations
+    - _Requirements: 3.4_
 
-- [ ] 13. Develop WebSocket real-time communication
-  - Implement FastAPI WebSocket endpoint for progress streaming
-  - Create event broadcasting system for pipeline updates
-  - Build connection management and reconnection logic
-  - Implement progress message formatting
-  - Add error event handling and transmission
-  - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+- [ ] 5. Implement Data Processor component
+  - [ ] 5.1 Create DataProcessor class
+    - Implement in backend/app/services/agent/data_processor.py
+    - Add data quality validation logic
+    - Build missing value handling strategies
+    - _Requirements: 7.1, 8.1_
+  - [ ] 5.2 Implement data splitting
+    - Create train/validation/test split (70/15/15 ratio)
+    - Handle stratification for classification tasks
+    - _Requirements: 7.1_
+  - [ ] 5.3 Build feature engineering pipelines
+    - Create pipelines for image data
+    - Create pipelines for text data
+    - Create pipelines for tabular data
+    - Add normalization and standardization utilities
+    - _Requirements: 8.1, 8.2, 8.3, 8.4_
+  - [ ] 5.4 Integrate with Cloud Storage
+    - Upload processed data to GCS
+    - Store data split metadata
+    - _Requirements: 8.1_
 
-- [ ] 14. Create project management API endpoints
-  - Build POST /api/v1/projects endpoint for project creation
-  - Create GET /api/v1/projects/{project_id} endpoint
-  - Implement GET /api/v1/projects/{project_id}/progress endpoint
-  - Build project listing endpoint with pagination
-  - Add project deletion endpoint with cascade cleanup
-  - _Requirements: 1.1, 1.2, 1.3, 1.5, 2.1_
+- [ ] 6. Develop unlabeled data handling system
+  - [ ] 6.1 Create labeling strategy selector
+    - Implement in backend/app/services/agent/labeling.py
+    - Use Gemini to determine best labeling approach
+    - _Requirements: 4.1, 4.2_
+  - [ ] 6.2 Implement zero-shot labeling
+    - Build zero-shot labeling for image data using Gemini
+    - Build zero-shot labeling for text data using Gemini
+    - Add confidence scoring for generated labels
+    - _Requirements: 4.2, 4.4_
+  - [ ] 6.3 Build weak supervision framework
+    - Implement semi-supervised learning approach
+    - Create transfer learning dataset matching
+    - _Requirements: 4.3_
+  - [ ] 6.4 Create user approval workflow
+    - Build approval request generation
+    - Store approval decisions in GCS
+    - _Requirements: 4.5_
 
-- [ ] 15. Build model results and reporting service
-  - Create model summary report generator
-  - Implement performance metrics formatting
-  - Build code example generator (Python, JavaScript, REST API)
-  - Create model documentation generator
-  - Implement report PDF generation
-  - Add model metadata API endpoint
-  - _Requirements: 5.3, 5.4, 5.5, 6.3_
+- [ ] 7. Build Model Selector component
+  - [ ] 7.1 Create ModelSelector class
+    - Implement in backend/app/services/agent/model_selector.py
+    - Build model architecture selection logic
+    - Map problem types to Vertex AI AutoML types
+    - _Requirements: 3.1, 3.2_
+  - [ ] 7.2 Implement hyperparameter recommendation
+    - Use Gemini for hyperparameter suggestions
+    - Create training budget estimation logic
+    - _Requirements: 3.3_
+  - [ ] 7.3 Add decision reasoning
+    - Generate human-readable explanations for model choices
+    - Implement confidence scoring
+    - Add fallback selection for edge cases
+    - _Requirements: 3.4, 3.5_
 
-- [ ] 16. Implement model prediction API
-  - Create POST /api/v1/models/{model_id}/predict endpoint
-  - Build input validation for different model types
-  - Implement Vertex AI Endpoint invocation
-  - Create response formatting and error handling
-  - Add prediction logging for monitoring
-  - _Requirements: 5.2_
+- [ ] 8. Implement Training Manager component
+  - [ ] 8.1 Create Vertex AI client
+    - Implement client in backend/app/services/cloud/vertex_client.py
+    - Configure authentication and project settings
+    - _Requirements: 9.1_
+  - [ ] 8.2 Build TrainingManager class
+    - Implement in backend/app/services/agent/training_manager.py
+    - Create training job submission logic
+    - Build job status monitoring with polling
+    - _Requirements: 9.1, 9.2, 7.2_
+  - [ ] 8.3 Add failure handling
+    - Implement retry logic (max 3 attempts)
+    - Create error recovery strategies
+    - _Requirements: 7.3, 7.4_
+  - [ ] 8.4 Integrate hyperparameter tuning
+    - Configure Vertex AI hyperparameter tuning
+    - Track tuning progress
+    - _Requirements: 9.2_
 
-- [ ] 17. Develop React frontend application structure
-  - Initialize React app with TypeScript and Vite
-  - Set up Material-UI theme and component library
-  - Configure React Router for navigation
-  - Set up React Query for API state management
-  - Create authentication context and protected routes
-  - Build layout components (header, sidebar, footer)
-  - _Requirements: 1.1, 10.3_
+- [ ] 9. Develop model evaluation and iteration system
+  - [ ] 9.1 Create evaluation utilities
+    - Implement in backend/app/services/agent/evaluator.py
+    - Build metric calculation (accuracy, precision, recall, F1)
+    - Add support for different problem types
+    - _Requirements: 7.2_
+  - [ ] 9.2 Build iteration decision logic
+    - Determine when to iterate based on performance thresholds
+    - Create hyperparameter adjustment strategies
+    - _Requirements: 7.3, 7.4_
+  - [ ] 9.3 Implement iteration loop
+    - Add iteration tracking (max 5 cycles)
+    - Generate performance comparison reports
+    - Store iteration history in GCS
+    - _Requirements: 7.4, 7.5_
 
-- [ ] 18. Build project submission interface
-  - Create problem description input form with validation
-  - Implement file upload component with drag-and-drop
-  - Build data type selector (optional override)
-  - Create approval preference toggle
-  - Implement form submission with loading states
-  - Add input validation and error display
-  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
+- [ ] 10. Build model deployment service
+  - [ ] 10.1 Create deployment utilities
+    - Implement in backend/app/services/cloud/deployment.py
+    - Build Vertex AI Endpoint deployment logic
+    - Configure autoscaling settings
+    - _Requirements: 5.1, 9.4_
+  - [ ] 10.2 Implement model artifact handling
+    - Create model artifact download preparation
+    - Generate signed URLs for secure downloads
+    - _Requirements: 5.1_
+  - [ ] 10.3 Add health checking and error handling
+    - Implement endpoint health checks
+    - Add deployment failure handling with fallback
+    - _Requirements: 5.2_
 
-- [ ] 19. Implement progress dashboard UI
-  - Create pipeline stage visualization component
-  - Build progress bar with percentage display
-  - Implement real-time log streaming display
-  - Create decision log viewer with expandable details
-  - Build estimated time remaining display
-  - Add stage-specific status indicators
-  - Implement WebSocket connection for live updates
-  - _Requirements: 2.1, 2.2, 2.3, 2.4, 6.2, 6.3, 6.4_
+- [ ] 11. Implement Agent Orchestrator
+  - [ ] 11.1 Create AgentOrchestrator class
+    - Implement in backend/app/services/agent/orchestrator.py
+    - Build main pipeline execution flow
+    - Integrate all agent components (Analyzer, Processor, Selector, Manager)
+    - _Requirements: 6.1, 6.2_
+  - [ ] 11.2 Implement state management
+    - Build stage transition logic
+    - Track pipeline state in GCS
+    - _Requirements: 6.2_
+  - [ ] 11.3 Add audit logging
+    - Create audit log generation for all decisions
+    - Store logs as JSON files in GCS
+    - _Requirements: 6.1, 6.4_
+  - [ ] 11.4 Build progress tracking
+    - Implement event emission for progress updates
+    - Create user approval checkpoints
+    - Add pipeline cancellation support
+    - _Requirements: 6.3, 6.4, 6.5_
+  - [ ] 11.5 Implement error handling
+    - Add error recovery strategies
+    - Handle failures gracefully
+    - _Requirements: 3.4_
 
-- [ ] 20. Build approval workflow interface
-  - Create decision approval modal component
-  - Implement decision details display with reasoning
-  - Build approve/reject action buttons
-  - Create approval history viewer
-  - Add notification system for pending approvals
-  - _Requirements: 4.5, 6.5_
+- [ ] 12. Develop WebSocket real-time communication
+  - [ ] 12.1 Create WebSocket endpoint
+    - Implement WS /api/v1/projects/{project_id}/stream in backend/app/api/v1/endpoints/websocket.py
+    - Build connection management
+    - _Requirements: 2.1_
+  - [ ] 12.2 Implement event broadcasting
+    - Create event broadcasting system for pipeline updates
+    - Format progress messages
+    - _Requirements: 2.2, 2.3, 2.4_
+  - [ ] 12.3 Add error handling
+    - Implement reconnection logic
+    - Handle error event transmission
+    - _Requirements: 2.5_
 
-- [ ] 21. Develop model results display page
-  - Create model metrics visualization (charts and tables)
-  - Build model download button with progress indicator
-  - Implement API endpoint display with copy-to-clipboard
-  - Create code examples tabbed interface
-  - Build model report viewer
-  - Add model testing interface for quick predictions
-  - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
+- [ ] 13. Create project management API endpoints
+  - [ ] 13.1 Create Pydantic schemas
+    - Implement request/response schemas in backend/app/schemas/project.py
+    - Add validation rules
+    - _Requirements: 1.1_
+  - [ ] 13.2 Build project endpoints
+    - Create backend/app/api/v1/endpoints/projects.py
+    - Implement POST /api/v1/projects (create project and start pipeline)
+    - Implement GET /api/v1/projects/{project_id}
+    - Implement GET /api/v1/projects (list with pagination)
+    - Implement DELETE /api/v1/projects/{project_id}
+    - _Requirements: 1.1, 1.2, 1.3, 1.5_
+  - [ ] 13.3 Add progress endpoint
+    - Implement GET /api/v1/projects/{project_id}/progress
+    - Return current stage, logs, and decisions
+    - _Requirements: 2.1_
 
-- [ ] 22. Implement error handling and user feedback
-  - Create error boundary components for React
-  - Build toast notification system for success/error messages
-  - Implement error page with recovery suggestions
-  - Create loading states for all async operations
-  - Add retry mechanisms for failed requests
-  - _Requirements: 2.5_
+- [ ] 14. Build model results and reporting service
+  - [ ] 14.1 Create report generator
+    - Implement in backend/app/services/reporting.py
+    - Build model summary report generator
+    - Format performance metrics
+    - _Requirements: 5.3, 6.3_
+  - [ ] 14.2 Build code example generator
+    - Generate Python usage examples
+    - Generate JavaScript usage examples
+    - Generate REST API examples
+    - _Requirements: 5.4_
+  - [ ] 14.3 Add model metadata endpoint
+    - Implement GET /api/v1/models/{model_id} in backend/app/api/v1/endpoints/models.py
+    - Return complete model information and report
+    - _Requirements: 5.5_
 
-- [ ] 23. Set up Celery for async task processing
-  - Configure Celery with Redis as message broker
-  - Create Celery tasks for pipeline stages
-  - Implement task result tracking
-  - Build task retry logic with exponential backoff
-  - Add task monitoring and logging
-  - _Requirements: 9.1, 9.2_
+- [ ] 15. Implement model prediction API
+  - [ ] 15.1 Create prediction endpoint
+    - Implement POST /api/v1/models/{model_id}/predict in backend/app/api/v1/endpoints/models.py
+    - Build input validation for different model types
+    - _Requirements: 5.2_
+  - [ ] 15.2 Integrate with Vertex AI
+    - Implement Vertex AI Endpoint invocation
+    - Format responses
+    - Add error handling
+    - _Requirements: 5.2_
+  - [ ] 15.3 Add prediction logging
+    - Log predictions for monitoring
+    - Track usage metrics
+    - _Requirements: 5.2_
 
-- [ ] 24. Implement caching layer with Redis
-  - Set up Redis connection and configuration
-  - Create cache utilities for common operations
-  - Implement session caching
-  - Build dataset preview caching
-  - Add API response caching with TTL
-  - _Requirements: Performance optimization_
+- [ ] 16. Develop React frontend application structure
+  - [ ] 16.1 Initialize React application
+    - Create Vite config with TypeScript
+    - Set up project structure
+    - Configure build and dev scripts
+    - _Requirements: 1.1_
+  - [ ] 16.2 Set up Material-UI
+    - Install and configure Material-UI
+    - Create theme in frontend/src/theme.ts
+    - Set up global styles
+    - _Requirements: 1.1_
+  - [ ] 16.3 Configure routing and state management
+    - Set up React Router in frontend/src/App.tsx
+    - Configure React Query
+    - Create API client in frontend/src/services/api.ts
+    - _Requirements: 1.1_
+  - [ ] 16.4 Create layout components
+    - Build Header component in frontend/src/components/common/Header.tsx
+    - Build Sidebar component
+    - Build main Layout component
+    - _Requirements: 1.1_
 
-- [ ] 25. Build monitoring and logging infrastructure
-  - Integrate Google Cloud Logging
-  - Create structured logging utilities
-  - Implement correlation ID tracking across requests
-  - Build audit log storage and retrieval
-  - Add performance metrics collection
-  - Create health check endpoints
-  - _Requirements: 6.1, 6.4_
+- [ ] 17. Build project submission interface
+  - [ ] 17.1 Create project submission page
+    - Build page in frontend/src/pages/NewProject.tsx
+    - Create form layout with Material-UI
+    - _Requirements: 1.1_
+  - [ ] 17.2 Build form components
+    - Create problem description input with validation
+    - Build file upload component with drag-and-drop in frontend/src/components/project/FileUpload.tsx
+    - Add data type selector (optional override)
+    - Create approval preference toggle
+    - _Requirements: 1.2, 1.3, 1.4, 1.5_
+  - [ ] 17.3 Implement form submission
+    - Add form validation
+    - Implement submission with loading states
+    - Handle errors and display feedback
+    - Navigate to progress page on success
+    - _Requirements: 1.1, 1.5_
 
-- [ ] 26. Implement security measures
-  - Add TLS configuration for all endpoints
-  - Implement API rate limiting middleware
-  - Create input sanitization utilities
-  - Build CORS configuration
-  - Add security headers (CSP, HSTS, etc.)
-  - Implement data encryption utilities for sensitive fields
-  - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
+- [ ] 18. Implement progress dashboard UI
+  - [ ] 18.1 Create progress page
+    - Build page in frontend/src/pages/ProjectProgress.tsx
+    - Set up WebSocket connection hook in frontend/src/hooks/useWebSocket.ts
+    - _Requirements: 2.1_
+  - [ ] 18.2 Build progress visualization components
+    - Create PipelineStages component in frontend/src/components/dashboard/PipelineStages.tsx
+    - Build ProgressBar component with percentage
+    - Add estimated time remaining display
+    - _Requirements: 2.2, 2.3, 2.4_
+  - [ ] 18.3 Create log viewers
+    - Build LogStream component in frontend/src/components/dashboard/LogStream.tsx
+    - Create DecisionLog component with expandable details
+    - Add stage-specific status indicators
+    - _Requirements: 2.3, 6.2, 6.3, 6.4_
 
-- [ ] 27. Create deployment configurations
-  - Write Dockerfile for backend service
-  - Write Dockerfile for frontend service
-  - Create Cloud Run service configurations
-  - Build Terraform/IaC scripts for infrastructure
-  - Configure Cloud SQL and Redis instances
-  - Set up Cloud Storage buckets with lifecycle policies
-  - Create CI/CD pipeline with GitHub Actions
-  - _Requirements: 9.3, 9.4, 9.5_
+- [ ] 19. Build approval workflow interface
+  - [ ] 19.1 Create approval modal
+    - Build ApprovalModal component in frontend/src/components/dashboard/ApprovalModal.tsx
+    - Display decision details with reasoning
+    - Add approve/reject action buttons
+    - _Requirements: 4.5, 6.5_
+  - [ ] 19.2 Add notification system
+    - Create notification hook for pending approvals
+    - Build notification badge in header
+    - _Requirements: 6.5_
+  - [ ] 19.3 Create approval history viewer
+    - Build component to display past approvals
+    - Show approval status and timestamps
+    - _Requirements: 6.5_
 
-- [ ] 28. Implement data cleanup and lifecycle management
-  - Create scheduled job for old dataset cleanup (90 days default)
-  - Build model artifact cleanup logic
-  - Implement user data deletion endpoint
-  - Create audit log archival system
-  - Add storage quota monitoring and alerts
-  - _Requirements: 10.5_
+- [ ] 20. Develop model results display page
+  - [ ] 20.1 Create results page
+    - Build page in frontend/src/pages/ModelResults.tsx
+    - Fetch model data and results
+    - _Requirements: 5.5_
+  - [ ] 20.2 Build metrics visualization
+    - Create MetricsDisplay component in frontend/src/components/results/MetricsDisplay.tsx
+    - Add charts for performance metrics
+    - Display metrics in tables
+    - _Requirements: 5.3_
+  - [ ] 20.3 Implement download and API display
+    - Build model download button with progress
+    - Create API endpoint display with copy-to-clipboard
+    - _Requirements: 5.1, 5.2_
+  - [ ] 20.4 Create code examples interface
+    - Build CodeExamples component with tabs (Python, JavaScript, REST)
+    - Add syntax highlighting
+    - _Requirements: 5.4_
+  - [ ] 20.5 Add model testing interface
+    - Create PredictionTester component in frontend/src/components/results/PredictionTester.tsx
+    - Allow quick predictions with sample inputs
+    - _Requirements: 5.2_
 
-- [ ]* 29. Write integration tests
-  - Create test fixtures for sample datasets
-  - Write API endpoint integration tests
-  - Build agent orchestrator integration tests with mocked services
-  - Create WebSocket communication tests
-  - Test authentication and authorization flows
-  - _Requirements: All requirements_
+- [ ] 21. Implement error handling and user feedback
+  - [ ] 21.1 Create error boundary
+    - Build ErrorBoundary component in frontend/src/components/common/ErrorBoundary.tsx
+    - Create error page with recovery suggestions
+    - _Requirements: 2.5_
+  - [ ] 21.2 Build notification system
+    - Create toast notification context in frontend/src/contexts/NotificationContext.tsx
+    - Build Toast component for success/error messages
+    - _Requirements: 2.5_
+  - [ ] 21.3 Add loading states
+    - Create Loading component
+    - Implement loading states for all async operations
+    - Add retry mechanisms for failed requests
+    - _Requirements: 2.5_
 
-- [ ]* 30. Create end-to-end tests
-  - Build complete pipeline test with sample image dataset
-  - Create complete pipeline test with sample tabular dataset
-  - Test error scenarios and recovery
-  - Implement load testing with Locust
-  - Test deployment and rollback procedures
-  - _Requirements: All requirements_
+- [ ] 22. Set up Celery for async task processing
+  - [ ] 22.1 Configure Celery
+    - Create Celery app in backend/app/core/celery_app.py
+    - Configure Redis as message broker
+    - Set up task routing
+    - _Requirements: 9.1_
+  - [ ] 22.2 Create Celery tasks
+    - Create task for pipeline execution in backend/app/tasks/pipeline.py
+    - Implement task result tracking
+    - _Requirements: 9.1, 9.2_
+  - [ ] 22.3 Add task monitoring
+    - Build retry logic with exponential backoff
+    - Add task logging
+    - Create task status endpoints
+    - _Requirements: 9.2_
 
-- [ ]* 31. Write documentation
-  - Create API documentation with OpenAPI/Swagger
-  - Write user guide for platform usage
-  - Build developer setup guide
-  - Create architecture documentation
-  - Write deployment runbook
-  - Add troubleshooting guide
-  - _Requirements: 5.4_
+- [ ]* 23. Write integration tests
+  - [ ]* 23.1 Create test infrastructure
+    - Set up pytest configuration in backend/pytest.ini
+    - Create test fixtures for sample datasets
+    - Set up test GCS bucket for testing
+    - _Requirements: All requirements_
+  - [ ]* 23.2 Write API tests
+    - Create tests in backend/tests/integration/test_api.py
+    - Test project management endpoints
+    - Test data upload endpoints
+    - Test model endpoints
+    - _Requirements: All requirements_
+  - [ ]* 23.3 Test agent components
+    - Create tests in backend/tests/integration/test_agent.py
+    - Test orchestrator with mocked cloud services
+    - Test WebSocket communication
+    - _Requirements: All requirements_

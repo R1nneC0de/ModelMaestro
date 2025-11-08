@@ -35,7 +35,6 @@ graph TB
     end
     
     subgraph "Data Layer"
-        DB[(PostgreSQL)]
         Redis[(Redis Cache)]
     end
     
@@ -51,7 +50,7 @@ graph TB
     DataProcessor --> GCS
     TrainingManager --> VertexAI
     TrainingManager --> Endpoints
-    API --> DB
+    API --> GCS
     API --> Redis
     VertexAI --> GCS
 ```
@@ -66,8 +65,7 @@ graph TB
 
 **Backend:**
 - FastAPI (Python 3.11+)
-- Pydantic for data validation
-- SQLAlchemy for ORM
+- Pydantic for data validation and schemas
 - Celery for async task processing
 - WebSocket support via FastAPI WebSockets
 
@@ -78,9 +76,8 @@ graph TB
 
 **Cloud Infrastructure:**
 - Google Cloud Vertex AI for model training
-- Google Cloud Storage for data and model artifacts
+- Google Cloud Storage for data, model artifacts, and metadata storage (JSON files)
 - Cloud Run for containerized deployment
-- Cloud SQL (PostgreSQL) for metadata storage
 - Redis (Memorystore) for caching and job queues
 
 ## Components and Interfaces
@@ -301,20 +298,38 @@ class TrainingManager:
 
 ### 4. Data Models
 
-#### Database Schema
+#### GCS Storage Structure
+
+All metadata is stored as JSON files in Google Cloud Storage with the following structure:
+
+```
+gs://{bucket}/
+  projects/
+    {project_id}.json
+  datasets/
+    {dataset_id}.json
+  models/
+    {model_id}.json
+  audit/
+    {project_id}/
+      {timestamp}_{stage}.json
+  data/
+    {dataset_id}/
+      raw/
+      processed/
+```
+
+#### Pydantic Schemas
 
 ```python
-class User(Base):
-    __tablename__ = "users"
-    
+class User(BaseModel):
     id: UUID
     email: str
     created_at: datetime
-    projects: List[Project]
-
-class Project(Base):
-    __tablename__ = "projects"
     
+    # Stored in: gs://{bucket}/users/{user_id}.json
+
+class Project(BaseModel):
     id: UUID
     user_id: UUID
     problem_description: str
@@ -323,11 +338,10 @@ class Project(Base):
     updated_at: datetime
     dataset_id: UUID
     model_id: Optional[UUID]
-    audit_log: List[AuditEntry]
-
-class Dataset(Base):
-    __tablename__ = "datasets"
     
+    # Stored in: gs://{bucket}/projects/{project_id}.json
+
+class Dataset(BaseModel):
     id: UUID
     project_id: UUID
     data_type: DataType
@@ -336,10 +350,10 @@ class Dataset(Base):
     num_samples: int
     is_labeled: bool
     metadata: Dict
-
-class Model(Base):
-    __tablename__ = "models"
     
+    # Stored in: gs://{bucket}/datasets/{dataset_id}.json
+
+class Model(BaseModel):
     id: UUID
     project_id: UUID
     architecture: str
@@ -348,10 +362,10 @@ class Model(Base):
     artifact_path: str  # GCS path
     metrics: Dict
     created_at: datetime
-
-class AuditEntry(Base):
-    __tablename__ = "audit_entries"
     
+    # Stored in: gs://{bucket}/models/{model_id}.json
+
+class AuditEntry(BaseModel):
     id: UUID
     project_id: UUID
     timestamp: datetime
@@ -360,6 +374,8 @@ class AuditEntry(Base):
     decision: str
     reasoning: str
     confidence: float
+    
+    # Stored in: gs://{bucket}/audit/{project_id}/{timestamp}_{stage}.json
 ```
 
 ## Error Handling

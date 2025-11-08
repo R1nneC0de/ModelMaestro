@@ -1,1 +1,1 @@
-# Cloud services integration
+"""Cloud services package."""
