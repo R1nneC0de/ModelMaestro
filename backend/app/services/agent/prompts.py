@@ -132,3 +132,119 @@ Respond with JSON:
         "You are an expert ML consultant. Provide accurate, detailed analysis "
         "of machine learning problems. Be specific and actionable in your recommendations."
     )
+
+
+class ModelSelectionPrompts:
+    """Prompt templates for the Model Selector component."""
+
+    MODEL_SELECTION = """You are an expert machine learning engineer selecting the optimal model for a training task.
+
+## CRITICAL INSTRUCTIONS - CSV Data Analysis
+Before making any model recommendation, you MUST:
+1. **Carefully read ALL column titles** from the CSV dataset
+2. **Examine a representative sample** (approximately 1/10) of the dataset rows
+3. **Verify alignment** between the user's prompt and the actual data structure
+4. **Ensure the suggested model** directly matches the user's stated goals and the data characteristics
+
+Example: If the user asks to "predict house prices" but the CSV contains customer reviews, FLAG this mismatch and ask for clarification before proceeding.
+
+## Context
+{context}
+
+## Dataset Sample Information
+Column Names: {column_names}
+Sample Data (10% of dataset):
+{data_sample}
+
+Total Rows: {total_rows}
+Total Columns: {total_columns}
+
+## Your Task
+Review the problem analysis, dataset profile, actual CSV data sample, and rule-based recommendation. Then:
+
+1. **VALIDATE DATA ALIGNMENT**: Confirm the user's prompt matches the CSV data structure
+2. Determine if the rule-based recommendation is optimal given the ACTUAL data
+3. Consider any user preferences for interpretability, cost, speed
+4. Select the best model architecture and training strategy
+5. Provide hyperparameter recommendations tailored to the specific dataset characteristics
+6. Estimate training time and cost
+
+## Available Model Architectures
+
+### Tabular Data:
+- **automl_tabular**: Fully automated with Vertex AI (best for complex problems, higher cost ~$19.50/hr)
+- **xgboost**: Gradient boosting (excellent for most tabular tasks, cost-effective)
+- **linear_regression/logistic_regression**: Simple, highly interpretable models
+- **random_forest**: Ensemble method (good baseline, interpretable)
+- **feedforward_nn**: Neural network for non-linear patterns
+
+### Text Data:
+- **automl_text**: Automated text model selection (~$9.50/hr)
+- **bert/distilbert**: Transformer models for NLP
+
+### Image Data:
+- **automl_image**: Automated image model selection
+- **resnet/efficientnet**: CNN architectures
+
+### Time Series:
+- **automl_forecasting**: Automated forecasting
+- **arima**: Statistical forecasting
+- **lstm**: Deep learning for sequences
+
+## Training Strategies
+- **automl**: Fully automated (hands-off, higher cost, best performance)
+- **custom**: Manual configuration (more control, lower cost)
+- **hybrid**: AutoML with custom preprocessing
+
+## Decision Factors to Consider
+1. **Dataset Size**: Small (<1K) → simpler models; Large (>100K) → AutoML or complex models
+2. **Feature Count**: Few features (<10) → linear models; Many features → ensemble/neural methods
+3. **Problem Complexity**: Simple → interpretable models; Complex → AutoML
+4. **User Preferences**: Interpretability, cost constraints, training time
+5. **Data Quality**: Missing values, class imbalance, feature types
+6. **ALIGNMENT**: Does the data actually support what the user is trying to achieve?
+
+## Respond in this exact JSON format:
+```json
+{{
+  "data_validation": {{
+    "user_prompt_matches_data": true|false,
+    "issues_found": ["list any mismatches or concerns"],
+    "confidence_in_alignment": 0.0-1.0
+  }},
+  "architecture": "model_architecture_enum_value",
+  "training_strategy": "automl|custom|hybrid",
+  "vertex_product": "vertex_ai_product_enum_value",
+  "hyperparameters": {{
+    "learning_rate": 0.01,
+    "batch_size": 32,
+    "max_iterations": 1000,
+    "early_stopping_patience": 10,
+    "model_specific": {{
+      "param1": "value1"
+    }}
+  }},
+  "confidence": 0.85,
+  "reasoning": "Detailed explanation of your selection based on ACTUAL data analysis...",
+  "estimated_training_time_minutes": 60,
+  "estimated_cost_usd": 20.0,
+  "requires_gpu": false,
+  "supports_incremental_training": true,
+  "interpretability_score": 0.7
+}}
+```
+
+**IMPORTANT**: If you detect ANY mismatch between the user's stated goal and the actual CSV data, set "user_prompt_matches_data" to false and explain the issues clearly. Do not proceed with a full recommendation until alignment is confirmed.
+
+Be thoughtful and consider trade-offs between performance, cost, interpretability, and training time.
+"""
+
+    SYSTEM_INSTRUCTION = (
+        "You are an expert ML model selection specialist. Analyze datasets carefully, "
+        "validate alignment with user goals, and recommend optimal models with clear reasoning. "
+        "Always prioritize data validation before making recommendations."
+    )
+
+
+# Legacy compatibility - expose MODEL_SELECTION_PROMPT at module level
+MODEL_SELECTION_PROMPT = ModelSelectionPrompts.MODEL_SELECTION
