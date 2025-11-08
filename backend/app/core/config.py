@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     MAX_UPLOAD_SIZE_MB: int = 10240
     ALLOWED_EXTENSIONS: str = ".csv,.json,.jpg,.jpeg,.png,.txt"
     
+    # Data Analysis Configuration
+    VALIDATION_SAMPLE_SIZE: int = 5  # Rows for quick validation
+    ANALYSIS_SAMPLE_SIZE: int = 50  # Rows for ML problem analysis
+    
     @property
     def allowed_extensions_list(self) -> List[str]:
         return [ext.strip() for ext in self.ALLOWED_EXTENSIONS.split(",")]

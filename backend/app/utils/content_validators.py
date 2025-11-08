@@ -11,7 +11,7 @@ from app.utils.file_validators import ValidationError, IMAGE_EXTENSIONS
 logger = logging.getLogger(__name__)
 
 
-def validate_csv_file(file_path: str) -> Dict[str, Any]:
+def validate_csv_file(file_path: str, sample_size: int = 5) -> Dict[str, Any]:
     """
     Validate a CSV file and extract metadata.
     
@@ -47,7 +47,7 @@ def validate_csv_file(file_path: str) -> Dict[str, Any]:
             row_count = 0
             for i, row in enumerate(reader):
                 row_count += 1
-                if i < 5:  # Get first 5 rows as sample
+                if i < sample_size:  # Get sample rows
                     rows.append(row)
             
             if row_count == 0:
@@ -71,7 +71,7 @@ def validate_csv_file(file_path: str) -> Dict[str, Any]:
         raise ValidationError(f"Failed to validate CSV file: {str(e)}")
 
 
-def validate_json_file(file_path: str) -> Dict[str, Any]:
+def validate_json_file(file_path: str, sample_size: int = 5) -> Dict[str, Any]:
     """
     Validate a JSON file and extract metadata.
     
@@ -91,11 +91,11 @@ def validate_json_file(file_path: str) -> Dict[str, Any]:
         # Determine structure
         if isinstance(data, list):
             num_items = len(data)
-            sample = data[:5] if num_items > 5 else data
+            sample = data[:sample_size] if num_items > sample_size else data
             structure = "array"
         elif isinstance(data, dict):
             num_items = len(data)
-            sample = dict(list(data.items())[:5])
+            sample = dict(list(data.items())[:sample_size])
             structure = "object"
         else:
             raise ValidationError("JSON must be an array or object")

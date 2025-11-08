@@ -8,7 +8,7 @@ Gemini API text responses, particularly JSON extraction.
 import json
 import logging
 import re
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from app.services.agent.exceptions import GeminiValidationError
 
@@ -78,7 +78,7 @@ IMPORTANT: Respond with valid JSON only. Do not include any text before or after
 Format your response as a JSON object enclosed in curly braces."""
 
     @staticmethod
-    def create_json_system_instruction(system_instruction: str | None) -> str:
+    def create_json_system_instruction(system_instruction: Optional[str]) -> str:
         """
         Create system instruction that emphasizes JSON output.
 

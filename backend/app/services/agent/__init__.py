@@ -6,6 +6,8 @@ processing data, selecting models, and managing training workflows.
 """
 
 from app.services.agent.analyzer import ProblemAnalyzer
+from app.services.agent.confidence_scorer import ConfidenceScorer
+from app.services.agent.data_type_detector import DataTypeDetector
 from app.services.agent.exceptions import (
     GeminiAPIError,
     GeminiClientError,
@@ -14,11 +16,15 @@ from app.services.agent.exceptions import (
     GeminiValidationError,
 )
 from app.services.agent.gemini_client import GeminiClient
+from app.services.agent.reasoning_generator import ReasoningGenerator
 from app.services.agent.types import DataType, ProblemAnalysis, ProblemType
 
 __all__ = [
     "ProblemAnalyzer",
     "GeminiClient",
+    "ConfidenceScorer",
+    "DataTypeDetector",
+    "ReasoningGenerator",
     "GeminiClientError",
     "GeminiAPIError",
     "GeminiRateLimitError",
