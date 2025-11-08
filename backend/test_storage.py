@@ -2,8 +2,18 @@
 
 import asyncio
 import sys
+import os
 from pathlib import Path
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+# Set GOOGLE_APPLICATION_CREDENTIALS explicitly
+credentials_path = Path(__file__).parent.parent / 'gcp-credentials' / 'gcp-key.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = str(credentials_path)
 
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

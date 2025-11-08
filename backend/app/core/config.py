@@ -14,8 +14,8 @@ class Settings(BaseSettings):
         extra="ignore"
     )
     
-    # Redis Configuration
-    REDIS_URL: str
+    # Redis Configuration (optional - only needed for Celery)
+    REDIS_URL: Optional[str] = None
     
     # Google Cloud Configuration
     GOOGLE_CLOUD_PROJECT: str

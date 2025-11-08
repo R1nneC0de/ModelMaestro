@@ -10,7 +10,7 @@ import logging
 import re
 from typing import Any, Dict
 
-from backend.app.services.agent.exceptions import GeminiValidationError
+from app.services.agent.exceptions import GeminiValidationError
 
 logger = logging.getLogger(__name__)
 

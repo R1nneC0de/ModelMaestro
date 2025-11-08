@@ -5,16 +5,16 @@ This module provides intelligent components for analyzing problems,
 processing data, selecting models, and managing training workflows.
 """
 
-from backend.app.services.agent.analyzer import ProblemAnalyzer
-from backend.app.services.agent.exceptions import (
+from app.services.agent.analyzer import ProblemAnalyzer
+from app.services.agent.exceptions import (
     GeminiAPIError,
     GeminiClientError,
     GeminiRateLimitError,
     GeminiTimeoutError,
     GeminiValidationError,
 )
-from backend.app.services.agent.gemini_client import GeminiClient
-from backend.app.services.agent.types import DataType, ProblemAnalysis, ProblemType
+from app.services.agent.gemini_client import GeminiClient
+from app.services.agent.types import DataType, ProblemAnalysis, ProblemType
 
 __all__ = [
     "ProblemAnalyzer",
