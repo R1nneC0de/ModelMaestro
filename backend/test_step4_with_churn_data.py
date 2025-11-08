@@ -7,12 +7,16 @@ This script demonstrates the complete workflow:
 2. Profile the dataset characteristics
 3. Run Step 4 model selection
 4. Generate Vertex AI training configuration
+
+Usage:
+    python test_step4_with_churn_data.py
 """
 import os
 import asyncio
 import csv
 from collections import Counter
 from pathlib import Path
+import sys
 
 # Set environment variables for testing
 os.environ["REDIS_URL"] = "redis://localhost:6379"
@@ -22,8 +26,9 @@ os.environ["GCS_BUCKET_NAME"] = "test-bucket"
 os.environ["GEMINI_API_KEY"] = "test-api-key"
 os.environ["ENVIRONMENT"] = "test"
 
-import sys
-sys.path.insert(0, '/home/user/ModelMaestro/backend')
+# Add backend to path (for when running from backend directory)
+backend_dir = Path(__file__).parent
+sys.path.insert(0, str(backend_dir))
 
 from app.services.agent.model_selector import ModelSelector
 from app.services.agent.types import ProblemType, DataType, ProblemAnalysis
@@ -144,11 +149,20 @@ async def test_customer_churn_model_selection():
 ╚══════════════════════════════════════════════════════════════════════════╝
     """)
 
-    # Path to CSV file
-    csv_path = "/home/user/ModelMaestro/Customer_Churn_data.csv"
+    # Path to CSV file (relative to backend directory)
+    script_dir = Path(__file__).parent
+    csv_path = script_dir.parent / "Customer_Churn_data.csv"
+
+    # Check if file exists
+    if not csv_path.exists():
+        print(f"\n❌ Error: CSV file not found at {csv_path}")
+        print(f"   Current directory: {Path.cwd()}")
+        print(f"   Script directory: {script_dir}")
+        print(f"\n   Please ensure Customer_Churn_data.csv is in the repository root.")
+        return []
 
     # Analyze the CSV
-    dataset_profile, csv_data, column_names = analyze_csv(csv_path)
+    dataset_profile, csv_data, column_names = analyze_csv(str(csv_path))
 
     # Create problem analysis (simulating Step 3 output)
     print(f"\n🔍 Step 3: Problem Analysis")
