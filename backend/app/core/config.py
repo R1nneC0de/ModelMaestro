@@ -14,8 +14,8 @@ class Settings(BaseSettings):
         extra="ignore"
     )
     
-    # Redis Configuration
-    REDIS_URL: str
+    # Redis Configuration (optional - only needed for Celery)
+    REDIS_URL: Optional[str] = None
     
     # Google Cloud Configuration
     GOOGLE_CLOUD_PROJECT: str
@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     # File Upload Configuration
     MAX_UPLOAD_SIZE_MB: int = 10240
     ALLOWED_EXTENSIONS: str = ".csv,.json,.jpg,.jpeg,.png,.txt"
+    
+    # Data Analysis Configuration
+    VALIDATION_SAMPLE_SIZE: int = 5  # Rows for quick validation
+    ANALYSIS_SAMPLE_SIZE: int = 50  # Rows for ML problem analysis
     
     @property
     def allowed_extensions_list(self) -> List[str]:

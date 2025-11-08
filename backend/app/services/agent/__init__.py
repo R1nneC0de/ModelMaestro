@@ -5,20 +5,26 @@ This module provides intelligent components for analyzing problems,
 processing data, selecting models, and managing training workflows.
 """
 
-from .analyzer import ProblemAnalyzer
-from .exceptions import (
+from app.services.agent.analyzer import ProblemAnalyzer
+from app.services.agent.confidence_scorer import ConfidenceScorer
+from app.services.agent.data_type_detector import DataTypeDetector
+from app.services.agent.exceptions import (
     GeminiAPIError,
     GeminiClientError,
     GeminiRateLimitError,
     GeminiTimeoutError,
     GeminiValidationError,
 )
-from .gemini_client import GeminiClient
-from .types import DataType, ProblemAnalysis, ProblemType
+from app.services.agent.gemini_client import GeminiClient
+from app.services.agent.reasoning_generator import ReasoningGenerator
+from app.services.agent.types import DataType, ProblemAnalysis, ProblemType
 
 __all__ = [
     "ProblemAnalyzer",
     "GeminiClient",
+    "ConfidenceScorer",
+    "DataTypeDetector",
+    "ReasoningGenerator",
     "GeminiClientError",
     "GeminiAPIError",
     "GeminiRateLimitError",

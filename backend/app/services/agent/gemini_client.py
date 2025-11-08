@@ -29,14 +29,14 @@ from tenacity import (
 )
 
 from app.core.config import settings
-from .exceptions import (
+from app.services.agent.exceptions import (
     GeminiAPIError,
     GeminiClientError,
     GeminiRateLimitError,
     GeminiTimeoutError,
     GeminiValidationError,
 )
-from .response_parser import ResponseParser
+from app.services.agent.response_parser import ResponseParser
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +60,7 @@ class GeminiClient:
     """
 
     # Default configuration constants
-    DEFAULT_MODEL = "gemini-1.5-pro"
+    DEFAULT_MODEL = "models/gemini-2.5-flash"  # Use gemini-2.5-flash (stable, fast, multimodal)
     DEFAULT_TEMPERATURE = 0.7
     DEFAULT_MAX_RETRIES = 3
     DEFAULT_TIMEOUT = 60

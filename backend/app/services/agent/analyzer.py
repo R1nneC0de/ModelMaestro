@@ -9,9 +9,12 @@ including problem classification, data type detection, and domain identification
 import logging
 from typing import Any, Dict, List, Optional
 
-from .gemini_client import GeminiClient
-from .prompts import AnalyzerPrompts
-from .types import DataType, ProblemAnalysis, ProblemType
+from app.services.agent.confidence_scorer import ConfidenceScorer
+from app.services.agent.data_type_detector import DataTypeDetector
+from app.services.agent.gemini_client import GeminiClient
+from app.services.agent.prompts import AnalyzerPrompts
+from app.services.agent.reasoning_generator import ReasoningGenerator
+from app.services.agent.types import DataType, ProblemAnalysis, ProblemType
 
 logger = logging.getLogger(__name__)
 
@@ -24,10 +27,6 @@ class ProblemAnalyzer:
     - Domain (medical, business, agriculture, etc.)
     - Success criteria and metrics
     """
-
-    # File extension mappings for quick data type detection
-    IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp"}
-    TEXT_EXTENSIONS = {".txt", ".json", ".csv", ".tsv"}
     
     # Default temperature for analysis (lower for more consistent results)
     ANALYSIS_TEMPERATURE = 0.3
@@ -42,6 +41,9 @@ class ProblemAnalyzer:
         self.gemini_client = gemini_client or GeminiClient(
             temperature=self.ANALYSIS_TEMPERATURE
         )
+        self.data_type_detector = DataTypeDetector(self.gemini_client)
+        self.confidence_scorer = ConfidenceScorer()
+        self.reasoning_generator = ReasoningGenerator()
         logger.info("Initialized ProblemAnalyzer")
 
     async def analyze_problem(
@@ -74,12 +76,14 @@ class ProblemAnalyzer:
 
         # Detect data type if not provided
         if not data_type_hint:
-            data_type_hint = await self._detect_data_type(
+            data_type_hint = await self.data_type_detector.detect_data_type(
                 data_sample, file_extensions or []
             )
 
         # Format data preview for prompt
-        data_preview = self._format_data_preview(data_sample, data_type_hint)
+        data_preview = DataTypeDetector.format_data_preview(
+            data_sample, data_type_hint
+        )
 
         # Generate comprehensive analysis using Gemini
         try:
@@ -134,106 +138,40 @@ class ProblemAnalyzer:
     def _parse_analysis_result(
         self, result: Dict[str, Any], is_labeled: bool
     ) -> ProblemAnalysis:
-        """Parse Gemini response into ProblemAnalysis object."""
+        """
+        Parse Gemini response into ProblemAnalysis object.
+        
+        Enhances the raw Gemini response with additional confidence scoring
+        and reasoning validation.
+        """
+        # Extract base confidence from Gemini
+        gemini_confidence = float(result.get("confidence", 0.5))
+        
+        # Calculate adjusted confidence based on multiple factors
+        adjusted_confidence = self.confidence_scorer.calculate_confidence_score(
+            result, is_labeled
+        )
+        
+        # Generate enhanced reasoning
+        enhanced_reasoning = self.reasoning_generator.generate_enhanced_reasoning(
+            result, gemini_confidence, adjusted_confidence
+        )
+        
         return ProblemAnalysis(
             problem_type=ProblemType(result.get("problem_type", "unknown")),
             data_type=DataType(result.get("data_type", "unknown")),
             domain=result.get("domain", "General"),
             suggested_metrics=result.get("suggested_metrics", []),
             complexity_score=float(result.get("complexity_score", 0.5)),
-            reasoning=result.get("reasoning", ""),
-            confidence=float(result.get("confidence", 0.5)),
+            reasoning=enhanced_reasoning,
+            confidence=adjusted_confidence,
             is_labeled=result.get("is_labeled", is_labeled),
             num_classes=result.get("num_classes"),
             target_variable=result.get("target_variable"),
             additional_insights=result.get("additional_insights", {}),
         )
 
-    async def _detect_data_type(
-        self, data_sample: Any, file_extensions: List[str]
-    ) -> str:
-        """
-        Detect the type of data from sample and file extensions.
 
-        Args:
-            data_sample: Sample of the data
-            file_extensions: List of file extensions
-
-        Returns:
-            Detected data type as string
-        """
-        logger.debug("Detecting data type from sample and extensions")
-
-        # Quick heuristic checks first
-        heuristic_type = self._heuristic_data_type_detection(file_extensions)
-        if heuristic_type != "unknown":
-            logger.debug(f"Detected data type via heuristics: {heuristic_type}")
-            return heuristic_type
-
-        # Use Gemini for more complex detection
-        return await self._gemini_data_type_detection(data_sample, file_extensions)
-
-    def _heuristic_data_type_detection(self, file_extensions: List[str]) -> str:
-        """Quick heuristic-based data type detection."""
-        if any(ext.lower() in self.IMAGE_EXTENSIONS for ext in file_extensions):
-            return "image"
-
-        if ".csv" in file_extensions or ".tsv" in file_extensions:
-            return "tabular"
-
-        if ".txt" in file_extensions:
-            return "text"
-
-        return "unknown"
-
-    async def _gemini_data_type_detection(
-        self, data_sample: Any, file_extensions: List[str]
-    ) -> str:
-        """Use Gemini for complex data type detection."""
-        try:
-            prompt = AnalyzerPrompts.DATA_TYPE_DETECTION.format(
-                data_sample=str(data_sample)[:1000],  # Limit sample size
-                file_extensions=", ".join(file_extensions),
-                num_files=len(file_extensions),
-            )
-
-            response = await self.gemini_client.generate_structured_response(
-                prompt=prompt, temperature=0.2
-            )
-
-            detected_type = response.get("data_type", "unknown")
-            logger.debug(f"Gemini detected data type: {detected_type}")
-            return detected_type
-
-        except Exception as e:
-            logger.warning(f"Error detecting data type with Gemini: {e}")
-            return "unknown"
-
-    def _format_data_preview(self, data_sample: Any, data_type: str) -> str:
-        """
-        Format data sample for display in prompts.
-
-        Args:
-            data_sample: Sample data
-            data_type: Type of data
-
-        Returns:
-            Formatted string representation
-        """
-        if data_type == "image":
-            return "Image data (visual inspection not available in preview)"
-
-        if isinstance(data_sample, dict):
-            preview_items = list(data_sample.items())[:5]
-            return "\n".join(f"  {k}: {v}" for k, v in preview_items)
-
-        if isinstance(data_sample, list):
-            preview_items = data_sample[:5]
-            return "\n".join(f"  - {item}" for item in preview_items)
-
-        # Default string representation with truncation
-        sample_str = str(data_sample)
-        return sample_str[:500] + "..." if len(sample_str) > 500 else sample_str
 
     async def identify_domain(
         self, problem_description: str, data_type: str, problem_type: str
@@ -332,16 +270,16 @@ class ProblemAnalyzer:
         # Simple keyword-based heuristics
         if "classify" in description_lower or "category" in description_lower:
             problem_type = ProblemType.CLASSIFICATION
-            metrics = ["accuracy", "precision", "recall", "f1_score"]
+            metrics = ["accuracy", "precision", "recall", "f1_score", "roc_auc", "pr_auc"]
         elif "predict" in description_lower or "forecast" in description_lower:
             problem_type = ProblemType.REGRESSION
             metrics = ["mse", "rmse", "mae", "r2_score"]
         elif "detect" in description_lower and data_type_hint == "image":
             problem_type = ProblemType.OBJECT_DETECTION
-            metrics = ["map", "precision", "recall"]
+            metrics = ["map", "precision", "recall", "roc_auc", "pr_auc"]
         else:
             problem_type = ProblemType.UNKNOWN
-            metrics = ["accuracy"]
+            metrics = ["accuracy", "roc_auc", "pr_auc"]
 
         return ProblemAnalysis(
             problem_type=problem_type,

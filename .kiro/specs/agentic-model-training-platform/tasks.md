@@ -89,22 +89,22 @@
     - Add validation and serialization methods
     - _Requirements: 10.3, 10.4_
 
-- [ ] 3. Develop data upload and storage service
-  - [ ] 3.1 Create Google Cloud Storage client
+- [x] 3. Develop data upload and storage service
+  - [x] 3.1 Create Google Cloud Storage client
     - Implement GCS utilities in backend/app/services/cloud/storage.py
     - Add bucket creation and file upload functions
     - _Requirements: 1.2, 8.1_
-  - [ ] 3.2 Build file validation utilities
+  - [x] 3.2 Build file validation utilities
     - Create validators in backend/app/utils/validators.py
     - Validate CSV, image folders, JSON formats
     - Check file size limits (max 10GB)
     - _Requirements: 1.4_
-  - [ ] 3.3 Implement data upload endpoint
+  - [x] 3.3 Implement data upload endpoint
     - Create POST /api/v1/data/upload in backend/app/api/v1/endpoints/data.py
     - Handle multipart form data
     - Extract and store dataset metadata
     - _Requirements: 1.2, 1.4_
-  - [ ] 3.4 Create data preview functionality
+  - [x] 3.4 Create data preview functionality
     - Generate previews for different data types
     - Create GET /api/v1/data/{dataset_id}/preview endpoint
     - _Requirements: 1.4_
@@ -121,7 +121,7 @@
     - Add data type detection (image, text, tabular, multimodal)
     - Create domain identification logic
     - _Requirements: 1.1, 3.1, 3.4, 8.1, 8.2, 8.3, 8.4, 8.5_
-  - [ ] 4.3 Add confidence scoring and reasoning
+  - [x] 4.3 Add confidence scoring and reasoning
     - Generate confidence scores for analysis results
     - Create human-readable reasoning explanations
     - _Requirements: 3.4_
