@@ -18,7 +18,8 @@ export interface HistoryBrowserOverlayProps {
 }
 
 export function HistoryBrowserOverlay({ visible }: HistoryBrowserOverlayProps) {
-  const { data: sessions, isLoading, error, refetch } = useHistory();
+  // Task 3.1: Fetch projects from backend with pagination
+  const { data, isLoading, error, refetch } = useHistory();
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
 
   if (!visible) {
@@ -43,6 +44,10 @@ export function HistoryBrowserOverlay({ visible }: HistoryBrowserOverlayProps) {
     );
   }
 
+  // Extract sessions from response
+  const sessions = data?.sessions || [];
+  const total = data?.total || 0;
+
   return (
     <div className="history-browser-overlay">
       <div className="history-browser-overlay__header">
@@ -50,7 +55,7 @@ export function HistoryBrowserOverlay({ visible }: HistoryBrowserOverlayProps) {
           Past Models
         </h2>
         <p className="history-browser-overlay__subtitle">
-          Browse your training history and view model performance
+          Browse your training history and view model performance {total > 0 && `(${total} total)`}
         </p>
       </div>
 
@@ -79,7 +84,7 @@ export function HistoryBrowserOverlay({ visible }: HistoryBrowserOverlayProps) {
       )}
 
       {/* Empty State */}
-      {!isLoading && !error && (!sessions || sessions.length === 0) && (
+      {!isLoading && !error && sessions.length === 0 && (
         <div className="history-browser-overlay__empty">
           <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="10" />
@@ -91,7 +96,7 @@ export function HistoryBrowserOverlay({ visible }: HistoryBrowserOverlayProps) {
       )}
 
       {/* Session List */}
-      {!isLoading && !error && sessions && sessions.length > 0 && (
+      {!isLoading && !error && sessions.length > 0 && (
         <div className="history-browser-overlay__list">
           {sessions.map((session, index) => (
             <SessionCard
@@ -118,10 +123,12 @@ interface SessionCardProps {
 }
 
 function SessionCard({ session, index, onClick }: SessionCardProps) {
+  // Task 3.2: Map ProjectStatus to visual indicators
+  // training=yellow, completed=green, failed=red
   const statusColors = {
-    training: '#FBBC04',
-    completed: '#34A853',
-    failed: '#EA4335',
+    training: '#FBBC04', // Yellow
+    completed: '#34A853', // Green
+    failed: '#EA4335', // Red
   };
 
   const statusLabels = {
@@ -141,6 +148,9 @@ function SessionCard({ session, index, onClick }: SessionCardProps) {
     });
   };
 
+  // Task 3.2: Display progress percentage
+  const progress = (session as any).progress || 0;
+
   return (
     <div
       className="session-card"
@@ -156,6 +166,7 @@ function SessionCard({ session, index, onClick }: SessionCardProps) {
           style={{ color: statusColors[session.status] }}
         >
           {statusLabels[session.status]}
+          {session.status === 'training' && progress > 0 && ` (${progress}%)`}
         </span>
       </div>
 
@@ -163,16 +174,20 @@ function SessionCard({ session, index, onClick }: SessionCardProps) {
 
       <div className="session-card__footer">
         <span className="session-card__date">{formatDate(session.timestamp)}</span>
-        {session.metrics && (
+        {session.metrics && session.metrics.accuracy !== undefined && (
           <span className="session-card__accuracy">
             Accuracy: {(session.metrics.accuracy * 100).toFixed(1)}%
           </span>
         )}
       </div>
 
-      {session.status === 'training' && (
+      {/* Task 3.2: Show progress bar for training sessions */}
+      {session.status === 'training' && progress > 0 && (
         <div className="session-card__progress">
-          <div className="session-card__progress-bar" />
+          <div 
+            className="session-card__progress-bar" 
+            style={{ width: `${progress}%` }}
+          />
         </div>
       )}
     </div>
@@ -213,6 +228,9 @@ function SessionDetailView({ sessionId, onBack }: SessionDetailViewProps) {
       {error && (
         <div className="session-detail__error">
           <p>Failed to load session details</p>
+          <p className="session-detail__error-message">
+            {(error as Error)?.message || 'Please try again later'}
+          </p>
         </div>
       )}
 
@@ -221,44 +239,80 @@ function SessionDetailView({ sessionId, onBack }: SessionDetailViewProps) {
           <h2 className="session-detail__title">{session.datasetName}</h2>
           <p className="session-detail__prompt">{session.prompt}</p>
 
+          {/* Task 3.3: Show metrics and evaluation report */}
           {session.metrics && (
             <div className="session-detail__metrics">
               <h3>Performance Metrics</h3>
               <div className="session-detail__metrics-grid">
-                <div className="session-detail__metric">
-                  <span className="session-detail__metric-label">Accuracy</span>
-                  <span className="session-detail__metric-value">
-                    {(session.metrics.accuracy * 100).toFixed(2)}%
-                  </span>
-                </div>
-                {session.metrics.precision !== undefined && (
-                  <div className="session-detail__metric">
-                    <span className="session-detail__metric-label">Precision</span>
+                {Object.entries(session.metrics).map(([key, value]) => (
+                  <div key={key} className="session-detail__metric">
+                    <span className="session-detail__metric-label">
+                      {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </span>
                     <span className="session-detail__metric-value">
-                      {(session.metrics.precision * 100).toFixed(2)}%
+                      {typeof value === 'number' 
+                        ? (value < 1 ? `${(value * 100).toFixed(2)}%` : value.toFixed(4))
+                        : value}
                     </span>
                   </div>
-                )}
-                {session.metrics.recall !== undefined && (
-                  <div className="session-detail__metric">
-                    <span className="session-detail__metric-label">Recall</span>
-                    <span className="session-detail__metric-value">
-                      {(session.metrics.recall * 100).toFixed(2)}%
-                    </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Task 3.3: Display evaluation report if available */}
+          {(session as any).report && (
+            <div className="session-detail__report">
+              <h3>Evaluation Report</h3>
+              <div className="session-detail__report-content">
+                <p><strong>Decision:</strong> {(session as any).report.decision}</p>
+                <p><strong>Reasoning:</strong> {(session as any).report.reasoning}</p>
+                {(session as any).report.recommendations && (
+                  <div>
+                    <strong>Recommendations:</strong>
+                    <ul>
+                      {(session as any).report.recommendations.map((rec: string, idx: number) => (
+                        <li key={idx}>{rec}</li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </div>
             </div>
           )}
 
+          {/* Task 3.3: Display prediction endpoint if available */}
+          {(session as any).predictionEndpoint && (
+            <div className="session-detail__endpoint">
+              <h3>Prediction API</h3>
+              <div className="session-detail__endpoint-content">
+                <code>{(session as any).predictionEndpoint}</code>
+                <button 
+                  className="session-detail__copy-button"
+                  onClick={() => navigator.clipboard.writeText((session as any).predictionEndpoint)}
+                >
+                  Copy
+                </button>
+              </div>
+            </div>
+          )}
+
           {session.modelId && (
             <div className="session-detail__actions">
-              <button className="session-detail__button session-detail__button--primary">
-                Download Model
-              </button>
-              <button className="session-detail__button session-detail__button--secondary">
+              <button 
+                className="session-detail__button session-detail__button--primary"
+                onClick={() => window.location.href = `/models/${session.modelId}`}
+              >
                 View Full Report
               </button>
+              {(session as any).predictionEndpoint && (
+                <button 
+                  className="session-detail__button session-detail__button--secondary"
+                  onClick={() => window.location.href = `/models/${session.modelId}/predict`}
+                >
+                  Test Predictions
+                </button>
+              )}
             </div>
           )}
         </div>

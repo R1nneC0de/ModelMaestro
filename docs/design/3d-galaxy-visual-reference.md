@@ -404,3 +404,4 @@ Angle: 45° from camera
 
 *This visual reference guide provides specific values and settings for implementing the 3D galaxy homepage experience.*
 
+

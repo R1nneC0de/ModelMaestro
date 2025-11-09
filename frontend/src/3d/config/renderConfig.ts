@@ -193,7 +193,7 @@ export const DEFAULT_CAMERA_CONFIG: CameraConfig = {
   fov: 60,               // Standard field of view
   near: 0.1,             // Close clipping
   far: 5000000,          // Very far clipping for deep space
-  position: [0, -600, 600],  // 45-degree angled view from below (looking up)
+  position: [0, -350, 350],  // Zoomed in even closer - 45-degree angled view from below (looking up)
   target: [0, 0, 0],     // Look at origin
 };
 

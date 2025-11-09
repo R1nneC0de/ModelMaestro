@@ -166,7 +166,7 @@ export function calculateTakeoffPosition(
  * @returns Vector3 position for overview state
  */
 export function getOverviewPosition(): Vector3 {
-  return new Vector3(0, -600, 600);
+  return new Vector3(0, -350, 350);
 }
 
 /**

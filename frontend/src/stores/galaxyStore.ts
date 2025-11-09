@@ -23,3 +23,4 @@ export const useGalaxyStore = create<GalaxyState>((set) => ({
   setIsTransitioning: (transitioning) => set({ isTransitioning: transitioning }),
 }));
 
+

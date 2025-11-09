@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { validateFile, formatFileSize } from '../../../utils/validators';
 import { useTraining } from '../../../hooks/useTraining';
 import { useNavigationStore } from '../../store/navigationStore';
+import { ProgressDashboardOverlay } from './ProgressDashboardOverlay';
 import './FileUploadOverlay.css';
 
 /**
@@ -15,19 +16,22 @@ import './FileUploadOverlay.css';
 
 export interface FileUploadOverlayProps {
   visible: boolean;
+  onShowProgressDashboard?: (projectId: string) => void;
 }
 
-export function FileUploadOverlay({ visible }: FileUploadOverlayProps) {
+export function FileUploadOverlay({ visible, onShowProgressDashboard }: FileUploadOverlayProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [prompt, setPrompt] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [showProgressDashboard, setShowProgressDashboard] = useState(false);
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { mutate: startTraining, isPending, isSuccess, error, data } = useTraining();
+  const { mutate: startTraining, isPending, isSuccess, error, data, reset } = useTraining();
   const { triggerUploadAnimation, startTrainingVisualization } = useNavigationStore();
   
-  // Trigger upload animation and training visualization on success (Req 11.2, 11.3)
+  // Task 2.2: Show ProgressDashboardOverlay after creation
   useEffect(() => {
     if (isSuccess && data) {
       // Trigger upload particle animation (Req 11.2)
@@ -36,9 +40,27 @@ export function FileUploadOverlay({ visible }: FileUploadOverlayProps) {
       // Start training visualization if we have a project ID (Req 11.3)
       if (data.projectId) {
         startTrainingVisualization(data.projectId);
+        
+        // Task 2.2: Store project_id and show progress dashboard
+        setCurrentProjectId(data.projectId);
+        setShowProgressDashboard(true);
+        
+        // Call parent callback if provided
+        if (onShowProgressDashboard) {
+          onShowProgressDashboard(data.projectId);
+        }
+        
+        // Reset form after successful submission
+        setTimeout(() => {
+          setSelectedFile(null);
+          setPrompt('');
+          if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+          }
+        }, 2000);
       }
     }
-  }, [isSuccess, data, triggerUploadAnimation, startTrainingVisualization]);
+  }, [isSuccess, data, triggerUploadAnimation, startTrainingVisualization, onShowProgressDashboard]);
 
   const handleFileValidation = (file: File): boolean => {
     const validation = validateFile(file);
@@ -110,12 +132,36 @@ export function FileUploadOverlay({ visible }: FileUploadOverlayProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!selectedFile || !prompt.trim()) {
-      setValidationError('Please select a file and provide a description');
+    // Task 2.3: Validate file before upload
+    if (!selectedFile) {
+      setValidationError('Please select a file');
+      return;
+    }
+    
+    if (!prompt.trim()) {
+      setValidationError('Please provide a problem description');
+      return;
+    }
+    
+    // Validate file again before submission
+    if (!handleFileValidation(selectedFile)) {
       return;
     }
 
+    // Clear any previous errors
+    setValidationError(null);
+    
+    // Start training with two-step process
     startTraining({ file: selectedFile, prompt: prompt.trim() });
+  };
+  
+  // Task 2.3: Allow retry on failure
+  const handleRetry = () => {
+    reset(); // Reset mutation state
+    setValidationError(null);
+    if (selectedFile && prompt.trim()) {
+      startTraining({ file: selectedFile, prompt: prompt.trim() });
+    }
   };
 
   if (!visible) {
@@ -123,8 +169,9 @@ export function FileUploadOverlay({ visible }: FileUploadOverlayProps) {
   }
 
   return (
-    <div className="file-upload-overlay">
-      <form onSubmit={handleSubmit} className="file-upload-overlay__panel">
+    <>
+      <div className="file-upload-overlay">
+        <form onSubmit={handleSubmit} className="file-upload-overlay__panel">
         {/* Unified Glass Panel */}
         <div
           className={`upload-panel ${isDragging ? 'dragging' : ''} ${selectedFile ? 'has-file' : ''}`}
@@ -203,6 +250,7 @@ export function FileUploadOverlay({ visible }: FileUploadOverlayProps) {
           </div>
 
           {/* Status Messages */}
+          {/* Task 2.3: Show user-friendly error messages with retry option */}
           {(validationError || error) && (
             <div className="upload-panel__message upload-panel__message--error" role="alert">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -210,7 +258,27 @@ export function FileUploadOverlay({ visible }: FileUploadOverlayProps) {
                 <line x1="12" y1="8" x2="12" y2="12" />
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
-              <span>{validationError || (error as Error)?.message || 'An error occurred'}</span>
+              <div style={{ flex: 1 }}>
+                <span>{validationError || (error as Error)?.message || 'An error occurred'}</span>
+                {error && !validationError && (
+                  <button
+                    type="button"
+                    onClick={handleRetry}
+                    style={{
+                      marginLeft: '12px',
+                      padding: '4px 12px',
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '4px',
+                      color: 'white',
+                      cursor: 'pointer',
+                      fontSize: '12px'
+                    }}
+                  >
+                    Retry
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
@@ -250,5 +318,23 @@ export function FileUploadOverlay({ visible }: FileUploadOverlayProps) {
         </div>
       </form>
     </div>
+    
+    {/* Task 2.2: Show ProgressDashboardOverlay after project creation */}
+    {showProgressDashboard && currentProjectId && (
+      <ProgressDashboardOverlay
+        visible={showProgressDashboard}
+        projectId={currentProjectId}
+        onComplete={() => {
+          setShowProgressDashboard(false);
+          setCurrentProjectId(null);
+        }}
+        onError={(error) => {
+          console.error('Training error:', error);
+          setValidationError(error);
+          setShowProgressDashboard(false);
+        }}
+      />
+    )}
+    </>
   );
 }

@@ -1,0 +1,181 @@
+# FileUploadOverlay Integration Test Plan
+
+## Test Checklist
+
+### ✅ Task 2.1: Two-Step Upload Process
+
+**Test 1: Verify API Structure**
+- [ ] Check `dataApi.upload` exists in `services/api.ts`
+- [ ] Check `trainingApi.submitTwoStep` exists in `services/api.ts`
+- [ ] Verify two-step process: upload → create project
+
+**Test 2: Upload Flow**
+- [ ] Select a CSV file
+- [ ] Enter problem description
+- [ ] Click "Start Training"
+- [ ] Verify network tab shows:
+  - POST to `/api/v1/data/upload` (Step 1)
+  - POST to `/api/v1/projects?dataset_id=xxx` (Step 2)
+- [ ] Verify response contains `projectId`
+
+### ✅ Task 2.2: Show ProgressDashboardOverlay
+
+**Test 3: Progress Dashboard Display**
+- [ ] Complete successful upload
+- [ ] Verify ProgressDashboardOverlay appears automatically
+- [ ] Verify `projectId` is passed to overlay
+- [ ] Verify WebSocket connection established
+- [ ] Verify real-time progress updates appear
+
+**Test 4: Form Reset**
+- [ ] After successful upload
+- [ ] Wait 2 seconds
+- [ ] Verify file is cleared
+- [ ] Verify prompt is cleared
+- [ ] Verify form is ready for new upload
+
+### ✅ Task 2.3: Error Handling
+
+**Test 5: Validation Errors**
+- [ ] Try to submit without file → See "Please select a file"
+- [ ] Try to submit without description → See "Please provide a problem description"
+- [ ] Select invalid file type → See format validation error
+- [ ] Select file > 50MB → See size validation error
+- [ ] Verify no API calls made for validation errors
+
+**Test 6: API Errors with Retry**
+- [ ] Simulate network error (disconnect)
+- [ ] Try to upload
+- [ ] Verify error message appears
+- [ ] Verify "Retry" button appears
+- [ ] Click Retry
+- [ ] Verify re-attempts upload
+- [ ] Reconnect network
+- [ ] Verify retry succeeds
+
+**Test 7: User-Friendly Messages**
+- [ ] Test 400 error → See validation message
+- [ ] Test 404 error → See "not found" message
+- [ ] Test 500 error → See "server error" message
+- [ ] Test network timeout → See "timeout" message
+- [ ] Verify all messages are clear and actionable
+
+## Manual Testing Steps
+
+### Setup
+```bash
+# Terminal 1: Start backend
+cd backend
+uvicorn app.main:app --reload
+
+# Terminal 2: Start frontend
+cd frontend
+npm run dev
+
+# Browser: http://localhost:3000
+```
+
+### Test Scenario 1: Happy Path
+1. Navigate to "Create Model" section
+2. Drag and drop `Customer_Churn_data.csv`
+3. Enter: "Predict customer churn based on usage patterns"
+4. Click "Start Training"
+5. **Expected**:
+   - Upload animation triggers
+   - ProgressDashboardOverlay appears
+   - Real-time progress updates show
+   - Pipeline stages update
+   - Logs stream in real-time
+
+### Test Scenario 2: Validation Errors
+1. Click "Start Training" without file
+2. **Expected**: "Please select a file"
+3. Select file, clear description
+4. Click "Start Training"
+5. **Expected**: "Please provide a problem description"
+6. Select `.txt` file
+7. **Expected**: "Invalid file format" error
+
+### Test Scenario 3: Network Error Recovery
+1. Open DevTools → Network tab
+2. Set throttling to "Offline"
+3. Try to upload file
+4. **Expected**: "Network error" with Retry button
+5. Set throttling to "Online"
+6. Click "Retry"
+7. **Expected**: Upload succeeds, dashboard appears
+
+### Test Scenario 4: Large File Handling
+1. Create file > 50MB
+2. Try to upload
+3. **Expected**: "File too large" error
+4. No API call made (check Network tab)
+
+## Integration Points
+
+### Backend Endpoints Used
+- `POST /api/v1/data/upload` - Upload dataset file
+- `POST /api/v1/projects?dataset_id={id}` - Create project
+- `GET /api/v1/projects/{id}/progress` - Get progress (via ProgressDashboardOverlay)
+- `WS /api/v1/ws/projects/{id}/stream` - Real-time updates (via ProgressDashboardOverlay)
+
+### Frontend Components
+- `FileUploadOverlay` - Main upload component
+- `ProgressDashboardOverlay` - Progress display
+- `useTraining` - Training mutation hook
+- `useWebSocket` - WebSocket connection (via ProgressDashboardOverlay)
+
+### State Flow
+```
+User uploads file
+  ↓
+FileUploadOverlay validates
+  ↓
+useTraining.mutate() called
+  ↓
+trainingApi.submitTwoStep()
+  ↓
+Step 1: dataApi.upload() → dataset_id
+  ↓
+Step 2: POST /projects?dataset_id={id} → project_id
+  ↓
+useTraining returns { projectId, status, ... }
+  ↓
+FileUploadOverlay sets showProgressDashboard=true
+  ↓
+ProgressDashboardOverlay renders with projectId
+  ↓
+WebSocket connects for real-time updates
+  ↓
+User sees training progress
+```
+
+## Success Criteria
+
+All tests pass when:
+- ✅ Two-step upload process works correctly
+- ✅ ProgressDashboardOverlay appears after successful upload
+- ✅ Real-time progress updates display
+- ✅ Validation errors prevent API calls
+- ✅ API errors show user-friendly messages
+- ✅ Retry functionality works for recoverable errors
+- ✅ Form resets after successful submission
+- ✅ No console errors or warnings
+
+## Known Issues / Notes
+
+1. **Temporary Project ID**: Uses `temp_${Date.now()}` for initial upload
+   - This is fine since dataset service creates its own dataset_id
+   - Project ID is generated by backend in Step 2
+
+2. **Form Reset Delay**: 2-second delay before reset
+   - Allows user to see success message
+   - Prevents jarring immediate reset
+
+3. **Retry Button**: Only appears for API errors
+   - Validation errors don't show retry (user must fix input)
+   - This is intentional UX design
+
+4. **Progress Dashboard**: Automatically closes on completion
+   - User can view results in History section
+   - Prevents dashboard from blocking UI indefinitely

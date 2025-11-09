@@ -98,3 +98,4 @@ The 3D galaxy homepage transforms navigation from flat links to spatial explorat
 
 *For questions or clarifications, refer to the detailed sections in each document.*
 
+

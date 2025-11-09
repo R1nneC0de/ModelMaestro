@@ -1,0 +1,271 @@
+/**
+ * ProgressDashboardOverlay Styles - Minimalist Glassmorphic Design
+ * Requirements: 2.1, 2.2, 2.3, 2.4
+ */
+
+.progress-dashboard-overlay {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.progress-dashboard-overlay__panel {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
+    0 2px 4px rgba(255, 255, 255, 0.1) inset;
+}
+
+/* Header */
+.progress-dashboard__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  gap: 20px;
+}
+
+.progress-dashboard__title-section {
+  flex: 1;
+}
+
+.progress-dashboard__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 6px 0;
+  letter-spacing: -0.5px;
+}
+
+.progress-dashboard__subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+/* Status Badge */
+.progress-dashboard__status {
+  flex-shrink: 0;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid;
+  transition: all 250ms ease-out;
+}
+
+.status-badge--connected {
+  background: rgba(52, 168, 83, 0.15);
+  border-color: rgba(52, 168, 83, 0.4);
+  color: #5FD068;
+}
+
+.status-badge--connected svg {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.status-badge--disconnected {
+  background: rgba(234, 67, 53, 0.15);
+  border-color: rgba(234, 67, 53, 0.4);
+  color: #FF6B6B;
+}
+
+.status-badge--reconnecting {
+  background: rgba(251, 188, 5, 0.15);
+  border-color: rgba(251, 188, 5, 0.4);
+  color: #FBC005;
+}
+
+.status-badge__spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error Display */
+.progress-dashboard__error {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(234, 67, 53, 0.12);
+  border: 1px solid rgba(234, 67, 53, 0.4);
+  border-radius: 16px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: slideIn 300ms ease-out;
+}
+
+.progress-dashboard__error svg {
+  color: #FF6B6B;
+  flex-shrink: 0;
+}
+
+.progress-dashboard__error > div {
+  flex: 1;
+  min-width: 0;
+}
+
+.progress-dashboard__error-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #FF6B6B;
+  margin: 0 0 4px 0;
+}
+
+.progress-dashboard__error-message {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.progress-dashboard__error-action {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms ease-out;
+}
+
+.progress-dashboard__error-action:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Actions */
+.progress-dashboard__actions {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.progress-dashboard__cancel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(234, 67, 53, 0.15);
+  border: 1px solid rgba(234, 67, 53, 0.4);
+  border-radius: 12px;
+  color: #FF6B6B;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 250ms ease-out;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.progress-dashboard__cancel:hover:not(:disabled) {
+  background: rgba(234, 67, 53, 0.25);
+  border-color: rgba(234, 67, 53, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(234, 67, 53, 0.3);
+}
+
+.progress-dashboard__cancel:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .progress-dashboard-overlay {
+    padding: 16px;
+    max-height: 95vh;
+  }
+
+  .progress-dashboard-overlay__panel {
+    padding: 24px 20px;
+    border-radius: 20px;
+  }
+
+  .progress-dashboard__header {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .progress-dashboard__title {
+    font-size: 20px;
+  }
+
+  .progress-dashboard__actions {
+    flex-direction: column;
+  }
+
+  .progress-dashboard__cancel {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Scrollbar Styling */
+.progress-dashboard-overlay::-webkit-scrollbar {
+  width: 8px;
+}
+
+.progress-dashboard-overlay::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.progress-dashboard-overlay::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  transition: background 200ms ease-out;
+}
+
+.progress-dashboard-overlay::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}

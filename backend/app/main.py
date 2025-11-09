@@ -1,19 +1,49 @@
 """Main FastAPI application."""
 
 import logging
+import structlog
+
+# IMPORTANT: Configure structlog BEFORE importing any modules that use it
+# This ensures structlog is properly configured when modules are imported
+
+# Configure structlog first
+# This configuration supports keyword arguments for structured logging
+structlog.configure(
+    processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        structlog.processors.JSONRenderer(),
+    ],
+    wrapper_class=structlog.stdlib.BoundLogger,
+    context_class=dict,
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    cache_logger_on_first_use=True,
+)
+
+# Configure standard logging (basic config, will be refined after settings load)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+# Now import other modules (they will use the configured structlog)
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
+
+# Update logging level based on settings
+logging.getLogger().setLevel(logging.DEBUG if settings.DEBUG else logging.INFO)
+
 from app.api.v1 import api_router
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO if not settings.DEBUG else logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # Create FastAPI app
 app = FastAPI(

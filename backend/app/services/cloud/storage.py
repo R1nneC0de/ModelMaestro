@@ -350,3 +350,43 @@ async def generate_signed_url(
     
     logger.info(f"Generated signed URL for {blob_name}")
     return url
+
+
+async def upload_json_to_gcs(
+    data: dict,
+    blob_name: str,
+    bucket_name: Optional[str] = None
+) -> str:
+    """
+    Upload JSON data to GCS.
+    
+    Args:
+        data: Dictionary to upload as JSON
+        blob_name: Name/path of the blob in GCS
+        bucket_name: Bucket name (defaults to settings)
+        
+    Returns:
+        GCS URI of uploaded file
+    """
+    import json
+    
+    bucket_name = bucket_name or settings.GCS_BUCKET_NAME
+    
+    try:
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(blob_name)
+        
+        # Upload JSON data
+        blob.upload_from_string(
+            json.dumps(data, indent=2),
+            content_type='application/json'
+        )
+        
+        uri = f"gs://{bucket_name}/{blob_name}"
+        logger.debug(f"Uploaded JSON to {uri}")
+        return uri
+        
+    except Exception as e:
+        logger.error(f"Failed to upload JSON to GCS: {e}")
+        raise

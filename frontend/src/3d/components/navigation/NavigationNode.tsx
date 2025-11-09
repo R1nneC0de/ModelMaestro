@@ -526,11 +526,11 @@ export const NavigationNode: React.FC<NavigationNodeProps> = ({
             {/* Category/Subtitle - small text above */}
             <div
               style={{
-                fontSize: '46px',
+                fontSize: '64px',
                 fontWeight: '600',
                 color: 'rgba(255, 255, 255, 0.75)',
                 textTransform: 'uppercase',
-                letterSpacing: '5px',
+                letterSpacing: '7px',
                 transition: 'all 0.3s ease',
                 textShadow: '0 4px 12px rgba(0, 0, 0, 1), 0 2px 6px rgba(0, 0, 0, 0.8)',
               }}
@@ -541,11 +541,11 @@ export const NavigationNode: React.FC<NavigationNodeProps> = ({
             {/* Main label - larger text below */}
             <div
               style={{
-                fontSize: '78px',
+                fontSize: '110px',
                 fontWeight: '900',
                 color: '#FFFFFF',
                 textTransform: 'uppercase',
-                letterSpacing: '8px',
+                letterSpacing: '12px',
                 textShadow: isHovered 
                   ? `0 0 40px ${colors.circleGlow}, 0 0 60px ${colors.circleGlow}, 0 0 80px ${colors.circleGlow}, 0 6px 20px rgba(0, 0, 0, 1)`
                   : `0 0 25px ${colors.circleGlow}, 0 0 40px ${colors.circleGlow}, 0 6px 20px rgba(0, 0, 0, 1)`,
@@ -560,11 +560,11 @@ export const NavigationNode: React.FC<NavigationNodeProps> = ({
           {isHovered && (
             <div
               style={{
-                fontSize: '32px',
+                fontSize: '42px',
                 fontWeight: '400',
                 color: 'rgba(255, 255, 255, 0.7)',
-                marginTop: '6px',
-                maxWidth: '585px',
+                marginTop: '10px',
+                maxWidth: '750px',
                 lineHeight: '1.4',
                 animation: 'fadeInSlide 0.4s ease-out',
                 textAlign: 'center',
