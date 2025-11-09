@@ -413,7 +413,8 @@ async def test_e2e_pipeline():
                 "batch_size": recommendation.hyperparameters.batch_size,
                 "max_iterations": recommendation.hyperparameters.max_iterations,
                 "optimization_objective": "maximize-au-roc",
-                "train_budget_milli_node_hours": 1000,  # 1 hour for testing
+                # Budget is automatically set by selection_rules based on dataset size
+                "train_budget_milli_node_hours": recommendation.hyperparameters.model_specific.get("train_budget_milli_node_hours", 1000),
                 "disable_early_stopping": False
             },
             split_config=SplitConfig(

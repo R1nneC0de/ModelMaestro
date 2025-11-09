@@ -385,12 +385,15 @@ class ModelSelectionRules:
         """Create AutoML Tabular recommendation."""
 
         # Estimate budget based on dataset size
-        if dataset_profile.num_samples < 100000:
-            budget_hours = 1.0
+        # Note: Google Cloud AutoML minimum is 1000 milli-node-hours (1 hour)
+        if dataset_profile.num_samples < 5000:
+            budget_hours = 1.0  # 1 hour (minimum allowed by AutoML)
+        elif dataset_profile.num_samples < 100000:
+            budget_hours = 1.0  # 1 hour for small-medium datasets
         elif dataset_profile.num_samples < 1000000:
-            budget_hours = 4.0
+            budget_hours = 4.0  # 4 hours for medium datasets
         else:
-            budget_hours = 24.0
+            budget_hours = 24.0  # 24 hours for large datasets
 
         optimization_objective = "maximize-au-roc" if problem_type == ProblemType.CLASSIFICATION else "minimize-rmse"
 

@@ -1,0 +1,279 @@
+/**
+ * InfoOverlay Styles - Modern Glassmorphic Design
+ * Requirements: 14.4
+ */
+
+.info-overlay {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.info-overlay__header {
+  margin-bottom: 32px;
+  text-align: center;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.info-overlay__title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 0 0 12px 0;
+  text-shadow: 0 2px 12px rgba(14, 165, 233, 0.3);
+  letter-spacing: -0.5px;
+}
+
+.info-overlay__subtitle {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Sections */
+.info-overlay__section {
+  margin-bottom: 32px;
+  padding: 32px;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  transition: all 250ms ease-out;
+}
+
+.info-overlay__section:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(14, 165, 233, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.info-overlay__section-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin: 0 0 24px 0;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(14, 165, 233, 0.2);
+  letter-spacing: -0.3px;
+}
+
+.info-overlay__text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 16px 0;
+}
+
+/* Steps */
+.info-overlay__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-overlay__step {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  transition: all 250ms ease-out;
+}
+
+.info-overlay__step:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(14, 165, 233, 0.25);
+  transform: translateX(6px);
+  box-shadow: 0 4px 16px rgba(14, 165, 233, 0.15);
+}
+
+.info-overlay__step-number {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25), rgba(2, 132, 199, 0.25));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(14, 165, 233, 0.35);
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #3BEAF7;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+}
+
+.info-overlay__step-content h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.2px;
+}
+
+.info-overlay__step-content p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+}
+
+/* Features Grid */
+.info-overlay__features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.info-overlay__feature {
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  transition: all 250ms ease-out;
+}
+
+.info-overlay__feature:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(14, 165, 233, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.15);
+}
+
+.info-overlay__feature-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.info-overlay__feature h4 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin: 0 0 8px 0;
+  letter-spacing: -0.2px;
+}
+
+.info-overlay__feature p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+}
+
+/* Use Cases */
+.info-overlay__use-cases {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.info-overlay__use-case {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  transition: all 250ms ease-out;
+}
+
+.info-overlay__use-case:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(14, 165, 233, 0.2);
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.12);
+}
+
+.info-overlay__use-case h4 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  letter-spacing: -0.3px;
+}
+
+.info-overlay__use-case p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 14px 0;
+}
+
+.info-overlay__use-case-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.info-overlay__use-case-tags span {
+  padding: 6px 12px;
+  background: rgba(14, 165, 233, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(59, 234, 247, 0.95);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 200ms ease-out;
+}
+
+.info-overlay__use-case-tags span:hover {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(14, 165, 233, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .info-overlay__title {
+    font-size: 26px;
+  }
+
+  .info-overlay__subtitle {
+    font-size: 16px;
+  }
+
+  .info-overlay__section-title {
+    font-size: 20px;
+  }
+
+  .info-overlay__features {
+    grid-template-columns: 1fr;
+  }
+
+  .info-overlay__step {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .info-overlay__step-number {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+}
