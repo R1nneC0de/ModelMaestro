@@ -40,10 +40,12 @@ class VertexJobManager:
         """
         try:
             # Determine job type from resource name
-            if "autoMlTabularTrainingJobs" in job_resource_name:
-                job = aiplatform.AutoMLTabularTrainingJob(job_resource_name)
+            # trainingPipelines are used by AutoML
+            if "trainingPipelines" in job_resource_name or "autoMlTabularTrainingJobs" in job_resource_name:
+                # Use get() method to retrieve existing job
+                job = aiplatform.AutoMLTabularTrainingJob.get(job_resource_name)
             elif "customJobs" in job_resource_name:
-                job = aiplatform.CustomTrainingJob(job_resource_name)
+                job = aiplatform.CustomTrainingJob.get(job_resource_name)
             else:
                 raise ValueError(f"Unknown job type: {job_resource_name}")
             
@@ -88,10 +90,12 @@ class VertexJobManager:
         """
         try:
             # Determine job type from resource name
-            if "autoMlTabularTrainingJobs" in job_resource_name:
-                job = aiplatform.AutoMLTabularTrainingJob(job_resource_name)
+            # trainingPipelines are used by AutoML
+            if "trainingPipelines" in job_resource_name or "autoMlTabularTrainingJobs" in job_resource_name:
+                # Use get() method to retrieve existing job
+                job = aiplatform.AutoMLTabularTrainingJob.get(job_resource_name)
             elif "customJobs" in job_resource_name:
-                job = aiplatform.CustomTrainingJob(job_resource_name)
+                job = aiplatform.CustomTrainingJob.get(job_resource_name)
             else:
                 raise ValueError(f"Unknown job type: {job_resource_name}")
             

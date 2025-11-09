@@ -17,4 +17,9 @@ export default defineConfig({
     outDir: 'dist',
     sourcemap: true,
   },
+  assetsInclude: ['**/*.glb', '**/*.gltf', '**/*.hdr', '**/*.exr'],
+  optimizeDeps: {
+    include: ['three', '@react-three/fiber', '@react-three/drei', '@react-three/postprocessing', '@tweenjs/tween.js'],
+    exclude: [],
+  },
 });

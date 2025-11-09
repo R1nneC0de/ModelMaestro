@@ -1,0 +1,425 @@
+/**
+ * NavigationHUD Styles
+ * Requirements: 1.4, 8.3
+ */
+
+.navigation-hud {
+  position: fixed;
+  top: 24px;
+  left: 24px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+}
+
+/* Logo and Branding */
+.navigation-hud__branding {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  pointer-events: none;
+}
+
+.navigation-hud__logo {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(14, 165, 233, 0.6))
+          drop-shadow(0 0 24px rgba(14, 165, 233, 0.3));
+  animation: logoGlow 4s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 12px rgba(14, 165, 233, 0.6))
+            drop-shadow(0 0 24px rgba(14, 165, 233, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(14, 165, 233, 0.8))
+            drop-shadow(0 0 32px rgba(14, 165, 233, 0.5));
+  }
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap');
+
+.navigation-hud__brand-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.95);
+  letter-spacing: 4px;
+  text-shadow: 0 0 20px rgba(14, 165, 233, 0.6), 
+               0 0 40px rgba(14, 165, 233, 0.3),
+               0 0 60px rgba(14, 165, 233, 0.15),
+               0 2px 10px rgba(0, 0, 0, 0.9),
+               2px 2px 0px rgba(14, 165, 233, 0.1);
+  animation: titleGlow 4s ease-in-out infinite;
+  font-family: 'Orbitron', 'Rajdhani', 'Exo 2', monospace, sans-serif;
+  white-space: nowrap;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(14, 165, 233, 0.9) 50%, 
+    rgba(255, 255, 255, 0.95) 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titleGlow 4s ease-in-out infinite, gradientShift 8s ease infinite;
+  position: relative;
+  text-transform: uppercase;
+}
+
+.navigation-hud__brand-title::before {
+  content: 'Model Maestro';
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: -1;
+  color: rgba(14, 165, 233, 0.3);
+  filter: blur(8px);
+  animation: titleGlow 4s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% {
+    text-shadow: 0 0 20px rgba(14, 165, 233, 0.6), 
+                 0 0 40px rgba(14, 165, 233, 0.3),
+                 0 0 60px rgba(14, 165, 233, 0.15),
+                 0 2px 10px rgba(0, 0, 0, 0.9),
+                 2px 2px 0px rgba(14, 165, 233, 0.1);
+    opacity: 0.95;
+  }
+  50% {
+    text-shadow: 0 0 30px rgba(14, 165, 233, 0.8), 
+                 0 0 50px rgba(14, 165, 233, 0.5),
+                 0 0 80px rgba(14, 165, 233, 0.2),
+                 0 2px 10px rgba(0, 0, 0, 0.9),
+                 2px 2px 0px rgba(14, 165, 233, 0.2);
+    opacity: 1;
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.navigation-hud > * {
+  pointer-events: all;
+}
+
+/* Location Display */
+.navigation-hud__location {
+  background: rgba(15, 20, 27, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid #1E2633;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.navigation-hud__loading,
+.navigation-hud__current {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.navigation-hud__spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(14, 165, 233, 0.2);
+  border-top-color: #0EA5E9;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.navigation-hud__current svg {
+  color: #0EA5E9;
+}
+
+/* Navigation Hints */
+.navigation-hud__hints {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.navigation-hud__hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 20, 27, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid #1E2633;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #B8BFC7;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  animation: fadeInSlide 0.3s ease-out;
+}
+
+.navigation-hud__hint--secondary {
+  opacity: 0.7;
+}
+
+.navigation-hud__hint svg {
+  color: #7C8794;
+  flex-shrink: 0;
+}
+
+.navigation-hud__hint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  background: #1E2633;
+  border: 1px solid #2A3441;
+  border-radius: 4px;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: monospace;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Keyboard Shortcuts Modal */
+.keyboard-shortcuts {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.keyboard-shortcuts__backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.keyboard-shortcuts__panel {
+  position: relative;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  background: #0F141B;
+  border: 1px solid #1E2633;
+  border-radius: 12px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: slideInScale 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.keyboard-shortcuts__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #1E2633;
+}
+
+.keyboard-shortcuts__header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.keyboard-shortcuts__close {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #7C8794;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 180ms ease-out;
+}
+
+.keyboard-shortcuts__close:hover {
+  background: #1E2633;
+  color: #FFFFFF;
+}
+
+.keyboard-shortcuts__content {
+  padding: 24px;
+  max-height: calc(80vh - 80px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.keyboard-shortcuts__section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0EA5E9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 0;
+}
+
+.keyboard-shortcuts__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.keyboard-shortcuts__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: #0A0E14;
+  border: 1px solid #1E2633;
+  border-radius: 6px;
+}
+
+.keyboard-shortcuts__item kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 28px;
+  padding: 0 8px;
+  background: #1E2633;
+  border: 1px solid #2A3441;
+  border-radius: 4px;
+  color: #FFFFFF;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: monospace;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.keyboard-shortcuts__item kbd + kbd {
+  margin-left: 4px;
+}
+
+.keyboard-shortcuts__item span {
+  flex: 1;
+  color: #B8BFC7;
+  font-size: 14px;
+}
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navigation-hud {
+    top: 16px;
+    left: 16px;
+    right: 16px;
+  }
+
+  .navigation-hud__hints {
+    display: none;
+  }
+
+  .keyboard-shortcuts__panel {
+    width: 95%;
+    max-height: 90vh;
+  }
+
+  .keyboard-shortcuts__content {
+    padding: 16px;
+  }
+
+  .keyboard-shortcuts__item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .navigation-hud__hint,
+  .keyboard-shortcuts,
+  .keyboard-shortcuts__panel {
+    animation: none;
+  }
+
+  .navigation-hud__spinner {
+    animation: none;
+    border-top-color: #0EA5E9;
+    border-right-color: #0EA5E9;
+  }
+}

@@ -12,19 +12,32 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.3",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.15.6",
+    "@mui/material": "^5.15.6",
+    "@react-three/drei": "^9.88.0",
+    "@react-three/fiber": "^8.15.0",
+    "@react-three/postprocessing": "^2.16.0",
+    "@tanstack/react-query": "^5.17.19",
+    "@tweenjs/tween.js": "^25.0.0",
+    "axios": "^1.6.5",
+    "framer-motion": "^12.23.24",
+    "gsap": "^3.12.5",
+    "postprocessing": "^6.35.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.21.3",
-    "@mui/material": "^5.15.6",
-    "@mui/icons-material": "^5.15.6",
-    "@emotion/react": "^11.11.3",
-    "@emotion/styled": "^11.11.0",
-    "@tanstack/react-query": "^5.17.19",
-    "axios": "^1.6.5"
+    "three": "^0.160.0",
+    "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.2.0",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.2",
     "@types/react": "^18.2.48",
     "@types/react-dom": "^18.2.18",
+    "@types/three": "^0.181.0",
     "@typescript-eslint/eslint-plugin": "^6.19.0",
     "@typescript-eslint/parser": "^6.19.0",
     "@vitejs/plugin-react": "^4.2.1",
@@ -33,9 +46,6 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "typescript": "^5.3.3",
     "vite": "^5.0.11",
-    "vitest": "^1.2.0",
-    "@testing-library/react": "^14.1.2",
-    "@testing-library/jest-dom": "^6.2.0",
-    "@testing-library/user-event": "^14.5.2"
+    "vitest": "^1.2.0"
   }
 }

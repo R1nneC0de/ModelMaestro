@@ -403,14 +403,8 @@ async def test_e2e_pipeline():
     try:
         from app.services.agent.training_manager import TrainingManager
         from app.services.agent.training_config import ModelConfig, SplitConfig
-        
-        # Create model configuration from recommendation
-        # Use recommended budget from model selector (calculated based on dataset size)
-        recommended_budget = recommendation.hyperparameters.model_specific.get(
-            "train_budget_milli_node_hours",
-            200  # Default to 12 minutes for small test datasets
-        )
 
+        # Create model configuration from recommendation
         model_config = ModelConfig(
             architecture=recommendation.architecture.value,
             vertex_ai_type=recommendation.training_strategy.value,
@@ -419,7 +413,8 @@ async def test_e2e_pipeline():
                 "batch_size": recommendation.hyperparameters.batch_size,
                 "max_iterations": recommendation.hyperparameters.max_iterations,
                 "optimization_objective": "maximize-au-roc",
-                "train_budget_milli_node_hours": recommended_budget,  # Use dataset-size-based budget
+                # Budget is automatically set by selection_rules based on dataset size
+                "train_budget_milli_node_hours": recommendation.hyperparameters.model_specific.get("train_budget_milli_node_hours", 1000),
                 "disable_early_stopping": False
             },
             split_config=SplitConfig(

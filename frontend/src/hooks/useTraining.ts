@@ -8,7 +8,8 @@ export function useTraining() {
       const formData = new FormData();
       formData.append('file', file);
       formData.append('problemDescription', prompt);
-      return trainingApi.submit(formData);
+      const response = await trainingApi.submit(formData);
+      return response;
     },
     onSuccess: (data) => {
       console.log('Training started:', data);
