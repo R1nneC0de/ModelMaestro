@@ -46,6 +46,8 @@ class Project(ProjectBase):
     updated_at: datetime
     dataset_id: Optional[str] = None
     model_id: Optional[str] = None
+    vertex_model_resource_name: Optional[str] = None
+    vertex_endpoint_id: Optional[str] = None
     
     model_config = {
         "json_schema_extra": {

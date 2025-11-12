@@ -146,18 +146,10 @@ frontend/dist/
 backend/test_output.log
 *.log
 
-# Implementation/task documentation (optional - remove if you want to commit these)
-**/TASK_*.md
-**/*_IMPLEMENTATION.md
-**/*_COMPLETE.md
-**/*_SUMMARY.md
-**/*_GUIDE.md
-**/*_RESULTS.md
-**/*_FIXES.md
-**/*_CHECKLIST.md
-**/*_DOCUMENTATION.md
-**/*_VALIDATION.md
-MIGRATION_*.md
+# All markdown files except README
+*.md
+!README.md
+!**/README.md
 
 # Python test files in root backend directory
 backend/test_*.py

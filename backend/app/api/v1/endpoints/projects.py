@@ -13,7 +13,6 @@ from app.schemas.project import (
     ProjectDeleteResponse
 )
 from app.services.project_service import ProjectService
-from app.api.v1.endpoints.websocket import get_event_broadcaster
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +27,7 @@ def get_project_service() -> ProjectService:
     global _project_service
     
     if _project_service is None:
-        # Get the event broadcaster for WebSocket updates
-        event_broadcaster = get_event_broadcaster()
-        _project_service = ProjectService(event_broadcaster=event_broadcaster)
+        _project_service = ProjectService()
         logger.info("Created singleton ProjectService instance")
     
     return _project_service
@@ -175,3 +172,70 @@ async def get_project_progress(
     if not progress:
         raise HTTPException(status_code=404, detail=f"Project {project_id} not found")
     return progress
+
+
+@router.get("/{project_id}/vertex-console-url")
+async def get_vertex_console_url(
+    project_id: str,
+    service: ProjectService = Depends(get_project_service)
+):
+    """
+    Get the Vertex AI console URL for a project's deployed model.
+    
+    For completed projects, this returns a link to the Vertex AI model in the console
+    where users can test the model with additional data.
+    
+    Args:
+        project_id: Project ID
+        service: Project service dependency
+        
+    Returns:
+        Dictionary with console URL
+        
+    Raises:
+        HTTPException: If project not found or not completed
+    """
+    from app.core.config import settings
+    from app.schemas.project import ProjectStatus
+    
+    project = await service.get_project(project_id)
+    if not project:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Project {project_id} not found"
+        )
+    
+    # Only provide Vertex AI link for completed projects
+    if project.status != ProjectStatus.COMPLETE:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Project is not completed yet (status: {project.status.value})"
+        )
+    
+    # Use the most recent deployed model (hardcoded for now since all projects use the same model)
+    # In production, this would come from project.vertex_model_resource_name
+    # The model ID from check_vertex_models.py: 6278012382996332544
+    model_id = "6278012382996332544"
+    
+    # If project has a specific model resource name, extract the ID from it
+    if hasattr(project, 'vertex_model_resource_name') and project.vertex_model_resource_name:
+        parts = project.vertex_model_resource_name.split('/')
+        if len(parts) >= 6:
+            model_id = parts[-1]
+    elif project.model_id:
+        # Try to extract from model_id
+        model_id = project.model_id.replace('model_', '').replace('ds_', '')
+    
+    # Construct Vertex AI console URL
+    console_url = (
+        f"https://console.cloud.google.com/vertex-ai/locations/"
+        f"{settings.VERTEX_AI_LOCATION}/models/{model_id}"
+        f"?project={settings.GOOGLE_CLOUD_PROJECT}"
+    )
+    
+    return {
+        "project_id": project_id,
+        "model_id": model_id,
+        "console_url": console_url,
+        "dataset_id": project.dataset_id
+    }

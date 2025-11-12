@@ -534,10 +534,18 @@ class AgentOrchestrator:
         """Execute deployment stage."""
         await self._emit_log(state, "info", "Starting model deployment")
         
-        # Simplified deployment - in production would deploy to Vertex AI Endpoint
+        # Extract Vertex AI model resource name
+        model_resource_name = None
+        if hasattr(training_output, 'model_resource_name'):
+            model_resource_name = training_output.model_resource_name
+        elif hasattr(training_output, 'model_uri'):
+            # Try to extract from model_uri
+            model_resource_name = training_output.model_uri
+        
         deployment_result = {
             "status": "deployed",
             "model_uri": training_output.model_uri if hasattr(training_output, 'model_uri') else None,
+            "model_resource_name": model_resource_name,
             "endpoint_url": None,  # Would be actual endpoint in production
             "deployed_at": datetime.utcnow().isoformat()
         }

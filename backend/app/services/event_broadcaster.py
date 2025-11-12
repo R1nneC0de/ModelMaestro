@@ -107,3 +107,28 @@ class EventBroadcaster:
             "details": details,
             "recoverable": recoverable
         })
+    
+    async def send_error_to_project(self, project_id: str, error: str, details: str = "", recoverable: bool = False):
+        """Send error to project (alias for error_event)."""
+        await self.error_event(project_id, error, details, recoverable)
+    
+    def create_orchestrator_callback(self, project_id: str):
+        """
+        Create a callback function for the orchestrator to use.
+        
+        This callback will be called by the orchestrator with event data
+        and will broadcast it via WebSocket.
+        
+        Args:
+            project_id: Project ID
+            
+        Returns:
+            Async callback function
+        """
+        async def callback(event: Dict[str, Any]):
+            """Callback function for orchestrator events."""
+            event_type = event.get("event_type", "unknown")
+            data = event.get("data", {})
+            await self.broadcast_event(project_id, event_type, data)
+        
+        return callback

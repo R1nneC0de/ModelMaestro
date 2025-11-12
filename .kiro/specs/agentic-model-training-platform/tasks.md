@@ -332,19 +332,7 @@
     - Return complete model information and report
     - _Requirements: 5.5_
 
-- [x] 15. Implement model prediction API
-  - [x] 15.1 Create prediction endpoint
-    - Implement POST /api/v1/models/{model_id}/predict in backend/app/api/v1/endpoints/models.py
-    - Build input validation for different model types
-    - _Requirements: 5.2_
-  - [x] 15.2 Integrate with Vertex AI
-    - Implement Vertex AI Endpoint invocation
-    - Format responses
-    - Add error handling
-    - _Requirements: 5.2_
-  - [x] 15.3 Add prediction logging
-    - Log predictions for monitoring
-    - Track usage metrics
+- [x] 1<div class="section-overlay__container"><button class="section-overlay__close" aria-label="Close overlay (ESC)" title="Close (ESC)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button><div class="section-overlay__content"><div class="session-detail"><div class="session-detail__header"><button class="session-detail__back"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>Back to List</button></div><div class="session-detail__content"><h2 class="session-detail__title">ds_ac32f6a299cb</h2><p class="session-detail__prompt">customer churn</p><div class="session-detail__prediction-tester"><h3>Test with Your Data</h3><p class="session-detail__prediction-description">Upload a CSV file to get predictions from the trained model</p><div class="session-detail__upload-area"><input type="file" accept=".csv" id="prediction-file-input" style="display: none;"><label for="prediction-file-input" class="session-detail__upload-button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>Testing_data.csv</label><button class="session-detail__predict-button">Get Predictions</button></div><div class="session-detail__prediction-results"><div class="session-detail__results-header"><h4>Prediction Results</h4><span class="session-detail__results-count">100 rows predicted (truncated to 100)</span></div><div class="session-detail__results-table"><table><thead><tr><th>Row</th><th>Prediction</th><th>Confidence</th></tr></thead><tbody><tr><td>1</td><td>No</td><td>52.8%</td></tr><tr><td>2</td><td>No</td><td>54.4%</td></tr><tr><td>3</td><td>No</td><td>51.1%</td></tr><tr><td>4</td><td>No</td><td>60.2%</td></tr><tr><td>5</td><td>No</td><td>59.2%</td></tr><tr><td>6</td><td>No</td><td>55.0%</td></tr><tr><td>7</td><td>No</td><td>55.5%</td></tr><tr><td>8</td><td>No</td><td>60.0%</td></tr><tr><td>9</td><td>No</td><td>53.1%</td></tr><tr><td>10</td><td>No</td><td>60.7%</td></tr></tbody></table><p class="session-detail__results-more">... and 90 more rows</p></div></div></div></div></div></div></div>
     - _Requirements: 5.2_
 
 - [ ] 16. Develop React frontend application structure

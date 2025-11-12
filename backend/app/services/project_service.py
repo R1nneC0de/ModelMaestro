@@ -23,18 +23,16 @@ logger = logging.getLogger(__name__)
 class ProjectService:
     """Service for managing ML training projects."""
     
-    def __init__(self, bucket_name: Optional[str] = None, event_broadcaster=None):
+    def __init__(self, bucket_name: Optional[str] = None):
         """
         Initialize the project service.
         
         Args:
             bucket_name: GCS bucket name for storage
-            event_broadcaster: Optional EventBroadcaster for WebSocket updates
         """
         self.bucket_name = bucket_name or settings.GCS_BUCKET_NAME
         self.storage = StorageManager("projects", Project, self.bucket_name)
         self.orchestrator = AgentOrchestrator(storage_bucket=self.bucket_name)
-        self.event_broadcaster = event_broadcaster
         logger.info(f"Initialized ProjectService with bucket {self.bucket_name}")
     
     async def create_project(
@@ -94,12 +92,6 @@ class ProjectService:
         try:
             logger.info(f"Starting pipeline for project {project_id}")
             
-            # Register WebSocket event callback if broadcaster is available
-            if self.event_broadcaster:
-                callback = self.event_broadcaster.create_orchestrator_callback(project_id)
-                self.orchestrator.register_event_callback(project_id, callback)
-                logger.info(f"Registered WebSocket callback for project {project_id}")
-            
             # Task 1.1: Load dataset from GCS
             dataset, data_df = await self._load_dataset(dataset_id)
             
@@ -139,8 +131,10 @@ class ProjectService:
             # Task 1.3: Update project status on completion
             logger.info(f"Pipeline completed for project {project_id}")
             
-            # Extract model_id from training output if available
+            # Extract model_id and Vertex AI info from training output
             model_id = None
+            vertex_model_resource_name = None
+            
             if result.get("training_output"):
                 training_output = result["training_output"]
                 if hasattr(training_output, 'model_uri'):
@@ -148,6 +142,18 @@ class ProjectService:
                     model_id = training_output.model_uri.split('/')[-1] if training_output.model_uri else None
                 elif hasattr(training_output, 'job_id'):
                     model_id = training_output.job_id
+                
+                # Get Vertex AI model resource name
+                if hasattr(training_output, 'model_resource_name'):
+                    vertex_model_resource_name = training_output.model_resource_name
+                elif hasattr(training_output, 'model_uri'):
+                    vertex_model_resource_name = training_output.model_uri
+            
+            # Also check deployment result for model resource name
+            if not vertex_model_resource_name and result.get("deployment_result"):
+                deployment_result = result["deployment_result"]
+                if isinstance(deployment_result, dict):
+                    vertex_model_resource_name = deployment_result.get("model_resource_name")
             
             # Update project with completion status
             update_data = {
@@ -156,6 +162,8 @@ class ProjectService:
             }
             if model_id:
                 update_data["model_id"] = model_id
+            if vertex_model_resource_name:
+                update_data["vertex_model_resource_name"] = vertex_model_resource_name
             
             await self.storage.update(project_id, update_data)
             
@@ -174,28 +182,6 @@ class ProjectService:
                     "updated_at": datetime.utcnow()
                 }
             )
-            
-            # Send error to WebSocket if broadcaster is available
-            if self.event_broadcaster:
-                try:
-                    await self.event_broadcaster.send_error_to_project(
-                        project_id=project_id,
-                        error="Pipeline execution failed",
-                        details=str(e),
-                        recoverable=False
-                    )
-                except Exception as broadcast_error:
-                    logger.error(f"Failed to broadcast error: {broadcast_error}")
-        
-        finally:
-            # Unregister callback when pipeline completes or fails
-            if self.event_broadcaster:
-                try:
-                    callback = self.event_broadcaster.create_orchestrator_callback(project_id)
-                    self.orchestrator.unregister_event_callback(project_id, callback)
-                    logger.info(f"Unregistered WebSocket callback for project {project_id}")
-                except Exception as cleanup_error:
-                    logger.warning(f"Failed to unregister callback: {cleanup_error}")
     
     async def _load_dataset(self, dataset_id: str):
         """

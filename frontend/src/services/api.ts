@@ -157,6 +157,17 @@ export const historyApi = {
       modelId: project.model_id || undefined,
       progress: calculateProgress(project.status)
     };
+  },
+  
+  getVertexConsoleUrl: async (projectId: string) => {
+    try {
+      const response = await apiClient.get(`/projects/${projectId}/vertex-console-url`);
+      return response.data;
+    } catch (error) {
+      // Return null if no model deployed or error occurred
+      console.warn(`Could not get Vertex AI console URL for project ${projectId}:`, error);
+      return null;
+    }
   }
 };
 
@@ -215,6 +226,16 @@ export const modelApi = {
   
   getStatus: async (modelId: string) => {
     const response = await apiClient.get(`/models/${modelId}/status`);
+    return response.data;
+  },
+  
+  predictFromFile: async (modelId: string, file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const response = await apiClient.post(`/models/${modelId}/predict/file`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
     return response.data;
   }
 };

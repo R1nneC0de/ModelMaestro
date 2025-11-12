@@ -135,3 +135,15 @@ This document defines the requirements for integrating the frontend 3D galaxy in
 3. THE Frontend SHALL support different API URLs for development, staging, and production
 4. THE Backend SHALL validate required environment variables on startup
 5. WHERE environment variables are missing, THEN THE Backend SHALL fail fast with clear error messages
+
+### Requirement 11: Vertex AI Console Integration
+
+**User Story:** As a user, I want to navigate directly to the Vertex AI console for my deployed models, so that I can test them with additional data in the Google Cloud interface.
+
+#### Acceptance Criteria
+
+1. WHEN a model is successfully deployed to Vertex AI, THE Backend SHALL store the Vertex AI endpoint ID and resource name
+2. WHEN the user views a completed project with a deployed model, THE Frontend SHALL display a link to the Vertex AI console
+3. WHEN the user clicks the Vertex AI console link, THE Frontend SHALL open the Vertex AI endpoint page in a new browser tab
+4. THE Backend SHALL construct the correct Vertex AI console URL using the project ID, location, and endpoint ID
+5. WHERE a model is not deployed or deployment failed, THEN THE Frontend SHALL not display the Vertex AI console link

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useWebSocket } from '../../../hooks/useWebSocket';
+import { usePolling } from '../../../hooks/usePolling';
 import { PipelineStages } from '../dashboard/PipelineStages';
 import { LogStream } from '../dashboard/LogStream';
 import './ProgressDashboardOverlay.css';
@@ -7,8 +7,9 @@ import './ProgressDashboardOverlay.css';
 /**
  * ProgressDashboardOverlay Component
  * 
- * Real-time progress dashboard for ML pipeline execution.
+ * Progress dashboard for ML pipeline execution via REST API polling.
  * Shows pipeline stages, progress, logs, and decision logs.
+ * Polls every 60 seconds for updates.
  * 
  * Requirements: 2.1, 2.2, 2.3, 2.4, 6.2, 6.3, 6.4
  */
@@ -27,18 +28,16 @@ export function ProgressDashboardOverlay({
   onError 
 }: ProgressDashboardOverlayProps) {
   const {
-    isConnected,
-    isReconnecting,
-    error: wsError,
+    error: pollingError,
     currentStage,
     progress,
     logs,
     decisions,
     cancelPipeline,
     reconnect,
-  } = useWebSocket({
+  } = usePolling({
     projectId,
-    autoReconnect: true,
+    pollingInterval: 60000, // Poll every 60 seconds (1 minute)
     onCompleted: (result) => {
       console.log('Pipeline completed:', result);
       onComplete?.();
@@ -48,16 +47,16 @@ export function ProgressDashboardOverlay({
       onError?.(error);
     },
     onError: (error, details) => {
-      console.error('WebSocket error:', error, details);
+      console.error('Polling error:', error, details);
     },
   });
 
   // Notify parent of errors
   useEffect(() => {
-    if (wsError) {
-      onError?.(wsError);
+    if (pollingError) {
+      onError?.(pollingError);
     }
-  }, [wsError, onError]);
+  }, [pollingError, onError]);
 
   if (!visible) {
     return null;
@@ -73,31 +72,15 @@ export function ProgressDashboardOverlay({
             <p className="progress-dashboard__subtitle">Project: {projectId.slice(0, 8)}</p>
           </div>
           
-          {/* Connection Status */}
+          {/* Polling Status */}
           <div className="progress-dashboard__status">
-            {isReconnecting ? (
-              <div className="status-badge status-badge--reconnecting">
-                <svg className="status-badge__spinner" width="14" height="14" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.25" />
-                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="4" fill="none" strokeLinecap="round" />
-                </svg>
-                Reconnecting...
-              </div>
-            ) : isConnected ? (
-              <div className="status-badge status-badge--connected">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="12" r="10" />
-                </svg>
-                Live
-              </div>
-            ) : (
-              <div className="status-badge status-badge--disconnected">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="12" r="10" />
-                </svg>
-                Disconnected
-              </div>
-            )}
+            <div className="status-badge status-badge--polling">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+              </svg>
+              Auto-refresh
+            </div>
           </div>
         </div>
 
@@ -108,7 +91,7 @@ export function ProgressDashboardOverlay({
         />
 
         {/* Error Display */}
-        {wsError && (
+        {pollingError && (
           <div className="progress-dashboard__error">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
@@ -116,14 +99,14 @@ export function ProgressDashboardOverlay({
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
             <div>
-              <p className="progress-dashboard__error-title">Connection Error</p>
-              <p className="progress-dashboard__error-message">{wsError}</p>
+              <p className="progress-dashboard__error-title">Update Error</p>
+              <p className="progress-dashboard__error-message">{pollingError}</p>
             </div>
             <button 
               className="progress-dashboard__error-action"
               onClick={reconnect}
             >
-              Retry
+              Retry Now
             </button>
           </div>
         )}
@@ -141,7 +124,8 @@ export function ProgressDashboardOverlay({
             <button
               className="progress-dashboard__cancel"
               onClick={cancelPipeline}
-              disabled={!isConnected}
+              disabled={true}
+              title="Pipeline cancellation not yet implemented"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="10" />

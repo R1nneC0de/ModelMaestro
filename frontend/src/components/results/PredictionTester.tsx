@@ -259,91 +259,156 @@ export default function PredictionTester({ modelId, endpointUrl, architecture }:
               <Box>
                 {prediction.predictions.map((pred, idx) => (
                   <Box key={idx} mb={3}>
-                    <Stack spacing={2}>
+                    <Stack spacing={3}>
                       {/* Classification Results */}
                       {pred.classes && pred.scores && (
                         <Box>
-                          <Typography variant="subtitle2" gutterBottom>
-                            Predicted Class
-                          </Typography>
-                          <Chip
-                            label={pred.predicted_class || pred.classes[0]}
-                            color="primary"
-                            size="large"
-                            sx={{ fontSize: '1rem', py: 2 }}
-                          />
-                          
-                          <Typography variant="subtitle2" sx={{ mt: 2 }} gutterBottom>
-                            Confidence
-                          </Typography>
-                          <Typography variant="h5" color="primary">
-                            {((pred.confidence || pred.scores[0]) * 100).toFixed(2)}%
-                          </Typography>
+                          {/* Main Prediction Card */}
+                          <Paper
+                            elevation={0}
+                            sx={{
+                              p: 3,
+                              mb: 3,
+                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                              color: 'white',
+                              borderRadius: 3
+                            }}
+                          >
+                            <Typography variant="overline" sx={{ opacity: 0.9, letterSpacing: 1 }}>
+                              Prediction Result
+                            </Typography>
+                            <Typography variant="h3" fontWeight="bold" sx={{ my: 1 }}>
+                              {pred.predicted_class || pred.classes[0]}
+                            </Typography>
+                            <Stack direction="row" spacing={2} alignItems="center">
+                              <Typography variant="h5" sx={{ opacity: 0.95 }}>
+                                {((pred.confidence || pred.scores[0]) * 100).toFixed(1)}%
+                              </Typography>
+                              <Chip
+                                label="Confidence"
+                                size="small"
+                                sx={{
+                                  bgcolor: 'rgba(255,255,255,0.2)',
+                                  color: 'white',
+                                  fontWeight: 'bold'
+                                }}
+                              />
+                            </Stack>
+                          </Paper>
 
-                          <Divider sx={{ my: 2 }} />
-
-                          <Typography variant="subtitle2" gutterBottom>
-                            All Classes
+                          {/* Probability Distribution */}
+                          <Typography variant="subtitle1" fontWeight="bold" gutterBottom sx={{ mb: 2 }}>
+                            Probability Distribution
                           </Typography>
-                          <Stack spacing={1}>
-                            {pred.classes.map((cls: string, i: number) => (
-                              <Box key={i}>
-                                <Stack direction="row" justifyContent="space-between" mb={0.5}>
-                                  <Typography variant="body2">{cls}</Typography>
-                                  <Typography variant="body2" fontWeight="bold">
-                                    {(pred.scores[i] * 100).toFixed(2)}%
-                                  </Typography>
-                                </Stack>
-                                <Box
+                          <Stack spacing={2}>
+                            {pred.classes.map((cls: string, i: number) => {
+                              const score = pred.scores[i];
+                              const isTopPrediction = i === 0 || score === Math.max(...pred.scores);
+                              
+                              return (
+                                <Paper
+                                  key={i}
+                                  elevation={isTopPrediction ? 2 : 0}
                                   sx={{
-                                    width: '100%',
-                                    height: 8,
-                                    bgcolor: 'grey.200',
-                                    borderRadius: 1,
-                                    overflow: 'hidden'
+                                    p: 2,
+                                    bgcolor: isTopPrediction ? 'primary.50' : 'grey.50',
+                                    border: isTopPrediction ? '2px solid' : '1px solid',
+                                    borderColor: isTopPrediction ? 'primary.main' : 'grey.200',
+                                    borderRadius: 2,
+                                    transition: 'all 0.2s ease'
                                   }}
                                 >
+                                  <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
+                                    <Stack direction="row" spacing={1} alignItems="center">
+                                      <Typography
+                                        variant="body1"
+                                        fontWeight={isTopPrediction ? 'bold' : 'medium'}
+                                      >
+                                        {cls}
+                                      </Typography>
+                                      {isTopPrediction && (
+                                        <Chip
+                                          label="Predicted"
+                                          size="small"
+                                          color="primary"
+                                          sx={{ height: 20, fontSize: '0.7rem' }}
+                                        />
+                                      )}
+                                    </Stack>
+                                    <Typography
+                                      variant="h6"
+                                      fontWeight="bold"
+                                      color={isTopPrediction ? 'primary.main' : 'text.secondary'}
+                                    >
+                                      {(score * 100).toFixed(1)}%
+                                    </Typography>
+                                  </Stack>
                                   <Box
                                     sx={{
-                                      width: `${pred.scores[i] * 100}%`,
-                                      height: '100%',
-                                      bgcolor: 'primary.main',
-                                      transition: 'width 0.3s ease'
+                                      width: '100%',
+                                      height: 12,
+                                      bgcolor: 'grey.200',
+                                      borderRadius: 2,
+                                      overflow: 'hidden',
+                                      position: 'relative'
                                     }}
-                                  />
-                                </Box>
-                              </Box>
-                            ))}
+                                  >
+                                    <Box
+                                      sx={{
+                                        width: `${score * 100}%`,
+                                        height: '100%',
+                                        background: isTopPrediction
+                                          ? 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)'
+                                          : 'linear-gradient(90deg, #a8b3cf 0%, #c8d0e7 100%)',
+                                        transition: 'width 0.5s ease',
+                                        boxShadow: isTopPrediction ? '0 2px 8px rgba(102, 126, 234, 0.4)' : 'none'
+                                      }}
+                                    />
+                                  </Box>
+                                </Paper>
+                              );
+                            })}
                           </Stack>
                         </Box>
                       )}
 
                       {/* Regression Results */}
                       {pred.value !== undefined && (
-                        <Box>
-                          <Typography variant="subtitle2" gutterBottom>
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            p: 3,
+                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                            color: 'white',
+                            borderRadius: 3
+                          }}
+                        >
+                          <Typography variant="overline" sx={{ opacity: 0.9, letterSpacing: 1 }}>
                             Predicted Value
                           </Typography>
-                          <Typography variant="h4" color="primary">
+                          <Typography variant="h3" fontWeight="bold" sx={{ mt: 1 }}>
                             {typeof pred.value === 'number' ? pred.value.toFixed(4) : pred.value}
                           </Typography>
-                        </Box>
+                        </Paper>
                       )}
 
-                      {/* Raw Prediction Data */}
+                      {/* Raw Prediction Data - Collapsible */}
                       <Box>
-                        <Typography variant="subtitle2" gutterBottom>
-                          Raw Response
+                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                          Technical Details
                         </Typography>
                         <Paper
                           sx={{
                             p: 2,
-                            bgcolor: 'grey.50',
-                            maxHeight: '200px',
-                            overflow: 'auto'
+                            bgcolor: 'grey.900',
+                            color: 'grey.100',
+                            maxHeight: '150px',
+                            overflow: 'auto',
+                            borderRadius: 2,
+                            fontFamily: 'monospace'
                           }}
                         >
-                          <pre style={{ margin: 0, fontSize: '0.75rem' }}>
+                          <pre style={{ margin: 0, fontSize: '0.7rem', lineHeight: 1.4 }}>
                             {JSON.stringify(pred, null, 2)}
                           </pre>
                         </Paper>
@@ -352,16 +417,28 @@ export default function PredictionTester({ modelId, endpointUrl, architecture }:
                   </Box>
                 ))}
 
-                {/* Metadata */}
-                <Divider sx={{ my: 2 }} />
-                <Typography variant="caption" color="text.secondary" display="block">
-                  Model ID: {prediction.model_id}
-                </Typography>
-                {prediction.endpoint_id && (
-                  <Typography variant="caption" color="text.secondary" display="block">
-                    Endpoint ID: {prediction.endpoint_id}
-                  </Typography>
-                )}
+                {/* Metadata Footer */}
+                <Divider sx={{ my: 3 }} />
+                <Stack spacing={0.5}>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                      Model ID:
+                    </Typography>
+                    <Typography variant="caption" color="text.primary">
+                      {prediction.model_id}
+                    </Typography>
+                  </Stack>
+                  {prediction.endpoint_id && (
+                    <Stack direction="row" spacing={1} alignItems="center">
+                      <Typography variant="caption" color="text.secondary" fontWeight="bold">
+                        Endpoint ID:
+                      </Typography>
+                      <Typography variant="caption" color="text.primary">
+                        {prediction.endpoint_id}
+                      </Typography>
+                    </Stack>
+                  )}
+                </Stack>
               </Box>
             )}
           </Paper>
